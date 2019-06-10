@@ -38,11 +38,11 @@ Make sure you can connect to this VM.
 ## Step 4 - create domain controller VM and install domain
 Create Resource Group names ad-dc-rg.
 
-Use CLI to create VM ad-dc-vm in ad-dc-rg in subnet domaincontroller with Windows with no Public IP and static Private IP 10.0.1.10. Create Network Security Group that will deny RDP traffic except from jump subnet and allow all other traffic within VNET.
+Use CLI to create VM ad-dc-vm in ad-dc-rg in subnet domaincontroller with Windows with no Public IP and static Private IP 10.0.1.10. Create Network Security Group that will deny RDP traffic except from jump subnet and allow all other traffic within VNET. Add additional data disk.
 
 Make sure you can connect to ad-dc-vm from jump-vm.
 
-Install Domain Controller on ad-dc-vm and setup DNS server.
+Format additional data disk and install Domain Controller on ad-dc-vm and setup DNS server.
 
 Update DNS settings in VNET to point to ad-dc-vm.
 

@@ -4,6 +4,7 @@
 - Each participant need to be able to log into both Azure Stack and Azure
 - Each participant to have his own subscription in Azure Stack as Owner using plan with all services enabled and unlimited quota
 - Install Application Services resource provider on Azure Stack in default configuration and scale number of dedicated worker nodes in Small tier to double amount of participants
+- For Day 2 install SQL resource provider
 - Download following items to marketplace:
   - Latest Windows 2016 Datacenter (PAYG)
   - Latest Ubuntu 16.04
@@ -13,12 +14,21 @@
   - Latest Kubernetes
   - Azure Monitor, Update and Configuration Management extension for Windows and Linux
   - Azure Monitor Dependency Agent extension for Windows and Linux
+  - For Day 2 download SQL images (SQL Standard 2017 on Windows)
+  - For Day 3 deploy additional components:
+    - CheckPoint and Fortigate
+    - F5
 - Each participant to have access to Azure shared subscription in one Resource Group (participantname-rg) on Contributor level
 - Unrestricted Internet access for each participant
 - Install tools on participant notebook:
   - Azure CLI
   - Visual Studio Code
   - Storage Explorer
+- Additional requirements for Day 2:
+  - Administrator access to Azure Stack to configure SQL provider and create custom marketplace items
+  - Service Principal account in AAD for each participant
+- Additional requirements for Day 3:
+  - Get trial licenses from vendors of your choice (Check Point comes with 15 trial built in, F5 does not - check how it is with Fortinet)
 
 ## Labs
 We will split content into three training days:
