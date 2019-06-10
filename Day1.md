@@ -13,6 +13,11 @@ During first day we will practice:
 ## Prerequisities
 Check [README](./README.md)
 
+## Guidelines
+Follow lab using this guide. Some tasks are accomplished via GUI, some via CLI, some with ARM templates. You will get examples of syntax so you can create commands yourself.
+
+For your convenience there is complete set of commands available at [day1-scriptshelp.ps1](./day1-scriptshelp.ps1). This for your reference and ability to quickly recreate lab environment. Please ** DO NOT use it during labs **, try work yourself and use examples to come up with right solutions.
+
 ## Step 1 - RBAC
 Create Resource Group named <yourname>-shared-rg and give colleague on your left access on Reader level. Also create Resource Group <yourname>-notshared-rg with no additional RBAC configurations.
 
@@ -28,17 +33,25 @@ Use CLI to create additional subnets:
 - webfarm (10.0.2.0/24)
 - backend (10.0.3.0/24)
 
+Example:
+```powershell
+az network vnet subnet create -n domaincontroller `
+    -g net-rg `
+    --vnet-name net `
+    --address-prefixes 10.0.1.0/24
+```
+
 ## Step 3 - jump VM
 Create Resource Group named jump-rg.
 
-Create VM jump-vm in jump-rg in subnet jump using Windows and size Standard_DS2 with Public IP. On firewall open port 3389 (RDP) only.
+Create VM jump-vm in jump-rg in subnet jump using Windows and size Standard_DS2 with Public IP. On firewall open port 3389 (RDP).
 
 Make sure you can connect to this VM.
 
 ## Step 4 - create domain controller VM and install domain
 Create Resource Group names ad-dc-rg.
 
-Use CLI to create VM ad-dc-vm in ad-dc-rg in subnet domaincontroller with Windows with no Public IP and static Private IP 10.0.1.10. Create Network Security Group that will deny RDP traffic except from jump subnet and allow all other traffic within VNET. Add additional data disk.
+Use CLI to create VM ad-dc-vm in ad-dc-rg in subnet domaincontroller with Windows with no Public IP and static Private IP 10.0.1.10. Create Network Security Group in net-rg resource group that will deny RDP traffic except from jump subnet and allow all other traffic within VNET. Assign NSG to subnet domaincontroller, not to VM directly. Add additional data disk.
 
 Make sure you can connect to ad-dc-vm from jump-vm.
 
