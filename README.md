@@ -29,6 +29,8 @@
   - Service Principal account in AAD for each participant
 - Additional requirements for Day 3:
   - Get trial licenses from vendors of your choice (Check Point comes with 15 trial built in, F5 does not - check how it is with Fortinet)
+- Make yourself familiar with [operator documentation](https://docs.microsoft.com/en-us/azure-stack/operator/) and [user documentation](https://docs.microsoft.com/en-us/azure-stack/user/)
+- Read [blog in Czech](https://www.tomaskubica.cz/tag/azurestack/)
 
 ## Labs
 We will split content into three training days:
