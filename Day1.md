@@ -157,7 +157,7 @@ az vm create -n app-02-vm `
     --availability-set app-as
 ```
 
-Use Join VM extension to automatically join VM to domain. When using CLI in PowerShell we need to use literal string, but still escape double quotes (note in bash this would look a little different):
+Use Join Domain extension to automatically join VM to domain. When using CLI in PowerShell we need to use literal string, but still escape double quotes (note in bash this would look a little different):
 ```powershell
 az vm extension set -n JsonADDomainExtension `
     --publisher "Microsoft.Compute" `
@@ -169,13 +169,64 @@ az vm extension set -n JsonADDomainExtension `
 ```
 
 ## Step 8 - Linux-based balanced web farm using Virtual Machine Scale Set
-Prepare Network Security Group. Deny all SSH traffic except from jump subnet. Allow http (80) from any location.
+Prepare Network Security Group web-nsg. Deny all SSH traffic except from jump subnet. Allow http (80) from any location. Apply NSG on web subnet.
 
-Use VMSS to create web farm with following attributes:
-- Use Azure LB with public IP
+Use VMSS to create web farm with following attributes using GUI:
+- Place it in resource group web-rg
+- Use webfarm subnet in net VNET
+- Name it webscaleset
+- Use Azure LB with public IP named web-lb-ip
+- Select globaly unique DNS name
 - Use Ubuntu 16.04 image
-- Use Linux script extension to automatically install NGINX and static web
-- Create farm with 3 replicas
+- Create farm with 2 replicas
+
+Your web farm is running, but there is now web service installed. We will use VM Extensions Custom Linux Script to automatically install web server (NGINX) and create simple static page.
+
+Use GUI and go to Extensions and add Custom Script for Linux extension. When asked for script file, use app-v1.sh that you download from [here](scripts/app-v1.sh). Use command bash app-v1.sh that should be run.
+
+With this we have updated VMSS model (that includes things like extensions, VM size, image, ...), but existing VMSS is still running on previous configuration. Go to VMSS in GUI, click Instances, select all and click Upgrade. Check web content v1 is served and load balanced.
+
+We will now upgrade model again by modifying extension to call different script that will install v2 version of our "application". GUI has created blob storage account for us and uploaded file. This time we will do this manually and all via CLI.
+
+Create Storage Account (make sure name is globally unique), create Blob container, upload app-v2.sh.
+
+```powershell
+$storageName = "myuniquename1919"
+az storage account create -n $storageName -g web-rg
+az storage container create -n deploy `
+    --connection-string $(az storage account show-connection-string -n $storageName -g web-rg -o tsv)
+
+az storage blob upload -f scripts/app-v2.sh `
+    -c deploy `
+    -n app-v2.sh `
+    --connection-string $(az storage account show-connection-string -n $storageName -g web-rg -o tsv)
+
+$v2Uri = $(az storage blob generate-sas -c deploy `
+    -n app-v2.sh `
+    --permissions r `
+    --expiry "2030-01-01" `
+    --https-only `
+    --full-uri `
+    --connection-string $(az storage account show-connection-string -n $storageName -g web-rg -o tsv) `
+    -o tsv )
+```
+
+Update VMSS model and upgrade it.
+```powershell
+$v2Settings = '{"fileUris": ["' + $v2Uri + '"]}'
+$v2Settings | Out-File v2Settings.json
+az vmss extension set --vmss-name webscaleset `
+    --name CustomScript `
+    -g web-rg `
+    --version 2.0 `
+    --publisher Microsoft.Azure.Extensions `
+    --protected-settings '{\"commandToExecute\": \"bash app-v2.sh\"}' `
+    --settings v2Settings.json
+
+az vmss update-instances --instance-ids '*' `
+    -n webscaleset `
+    -g web-rg
+```
 
 ## Step 9 - monitor using Azure services
 Open Azure portal and prepare monitoring environment:

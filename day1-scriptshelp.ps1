@@ -210,3 +210,108 @@ az vm extension set -n JsonADDomainExtension `
     -g app-rg `
     --settings '{\"Name\":\"corp.stack.com\", \"User\":\"labuser@corp.stack.com\", \"Restart\":\"true\", \"OUPath\":\"\", \"Options\":3}' `
     --protected-settings '{\"Password\":\"Azure12345678\"}'
+
+# Step 8
+## Create and apply NSG
+az network nsg create -n web-nsg -g net-rg
+az network nsg rule create -g net-rg `
+    --nsg-name web-nsg `
+    -n DenyRDP `
+    --priority 100 `
+    --source-address-prefixes 10.0.0.0/24 `
+    --source-port-ranges '*' `
+    --destination-address-prefixes '*' `
+    --destination-port-ranges 3389 `
+    --access Allow `
+    --protocol Tcp `
+    --description "Allow RDP from jump subnet"
+az network nsg rule create -g net-rg `
+    --nsg-name web-nsg `
+    -n AllowRDPFromJump `
+    --priority 110 `
+    --source-address-prefixes '*' `
+    --source-port-ranges '*' `
+    --destination-address-prefixes '*' `
+    --destination-port-ranges 3389 `
+    --access Deny `
+    --protocol Tcp `
+    --description "Deny RDP traffic"
+az network nsg rule create -g net-rg `
+    --nsg-name web-nsg `
+    -n AllowHttp `
+    --priority 120 `
+    --source-address-prefixes '*' `
+    --source-port-ranges '*' `
+    --destination-address-prefixes '*' `
+    --destination-port-ranges 80 `
+    --access Allow `
+    --protocol Tcp `
+    --description "Allow HTTP from jump subnet"
+az network vnet subnet update -g net-rg `
+    -n webfarm `
+    --vnet-name net `
+    --network-security-group web-nsg
+
+## Create Virtual Machine Scale Set
+az group create -n web-rg -l $region
+
+## Create storage account and upload scripts
+$storageName = "myuniquename1919"
+az storage account create -n $storageName -g web-rg
+az storage container create -n deploy `
+    --connection-string $(az storage account show-connection-string -n $storageName -g web-rg -o tsv)
+az storage blob upload -f scripts/app-v1.sh `
+    -c deploy `
+    -n app-v1.sh `
+    --connection-string $(az storage account show-connection-string -n $storageName -g web-rg -o tsv)
+az storage blob upload -f scripts/app-v2.sh `
+    -c deploy `
+    -n app-v2.sh `
+    --connection-string $(az storage account show-connection-string -n $storageName -g web-rg -o tsv)
+
+$v1Uri = $(az storage blob generate-sas -c deploy `
+    -n app-v1.sh `
+    --permissions r `
+    --expiry "2030-01-01" `
+    --https-only `
+    --full-uri `
+    --connection-string $(az storage account show-connection-string -n $storageName -g web-rg -o tsv) `
+    -o tsv )
+$v2Uri = $(az storage blob generate-sas -c deploy `
+    -n app-v2.sh `
+    --permissions r `
+    --expiry "2030-01-01" `
+    --https-only `
+    --full-uri `
+    --connection-string $(az storage account show-connection-string -n $storageName -g web-rg -o tsv) `
+    -o tsv )
+
+## Update VMSS model for v1 script and upgrade
+$v1Settings = '{"fileUris": ["' + $v1Uri + '"]}'
+$v1Settings | Out-File v1Settings.json
+az vmss extension set --vmss-name webscaleset `
+    --name CustomScript `
+    -g web-rg `
+    --version 2.0 `
+    --publisher Microsoft.Azure.Extensions `
+    --protected-settings '{\"commandToExecute\": \"bash app-v1.sh\"}' `
+    --settings v1Settings.json
+
+az vmss update-instances --instance-ids '*' `
+    -n webscaleset `
+    -g web-rg
+
+## Update VMSS model for v2 script and upgrade
+$v2Settings = '{"fileUris": ["' + $v2Uri + '"]}'
+$v2Settings | Out-File v2Settings.json
+az vmss extension set --vmss-name webscaleset `
+    --name CustomScript `
+    -g web-rg `
+    --version 2.0 `
+    --publisher Microsoft.Azure.Extensions `
+    --protected-settings '{\"commandToExecute\": \"bash app-v2.sh\"}' `
+    --settings v2Settings.json
+
+az vmss update-instances --instance-ids '*' `
+    -n webscaleset `
+    -g web-rg
