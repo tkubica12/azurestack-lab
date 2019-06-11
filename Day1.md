@@ -134,7 +134,7 @@ Connect to VM and install [Azure Data Studio](https://go.microsoft.com/fwlink/?l
 ## Step 6 - create app-01-vm virtual machine
 Create Resource Group app-rg.
 
-Create Availability Set names app-as.
+Create Availability Set named app-as.
 
 Create VM app-01-vm using your custom image in backend subnet, app-rg Resource Group and place in app-as using GUI.
 

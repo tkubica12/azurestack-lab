@@ -171,3 +171,21 @@ az image create -g images-rg `
     -n app-image `
     --source $(az vm show -g imageprepare-rg -n appimage-vm --query id -o tsv)
 az group delete -n imageprepare-rg -y --no-wait
+
+# Step 6
+az group create -n app-rg -l $region
+az vm availability-set create -n app-as -g app-rg
+
+az vm create -n app-01-vm `
+    -g app-rg `
+    --image $(az image show -g images-rg -n app-image --query id -o tsv) `
+    --size Standard_DS1_v2 `
+    --admin-username labuser `
+    --admin-password Azure12345678 `
+    --public-ip-address '""' `
+    --nsg '""' `
+    --subnet $(az network vnet subnet show -g net-rg --name backend --vnet-name net --query id -o tsv) `
+    --availability-set app-as
+
+## Connect to VM and use PowerShell to join it to domain
+Add-Computer -DomainName corp.stack.com -Restart
