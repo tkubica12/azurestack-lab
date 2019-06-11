@@ -53,30 +53,95 @@ Create Resource Group names ad-dc-rg.
 
 Use CLI to create VM ad-dc-vm in ad-dc-rg in subnet domaincontroller with Windows with no Public IP and static Private IP 10.0.1.10. Create Network Security Group in net-rg resource group that will deny RDP traffic except from jump subnet and allow all other traffic within VNET. Assign NSG to subnet domaincontroller, not to VM directly. Add additional data disk.
 
+Example for creating NSG and assigning to subnet (only Allow is listed, complete with Deny rule for RDP):
+```powershell
+az network nsg create -n domaincontroller-nsg -g net-rg
+az network nsg rule create -g net-rg `
+    --nsg-name domaincontroller-nsg `
+    -n DenyRDP `
+    --priority 100 `
+    --source-address-prefixes 10.0.0.0/24 `
+    --source-port-ranges '*' `
+    --destination-address-prefixes '*' `
+    --destination-port-ranges 3389 `
+    --access Allow `
+    --protocol Tcp `
+    --description "Allow RDP from jump subnet"
+az network vnet subnet update -g net-rg `
+    -n domaincontroller `
+    --vnet-name net `
+    --network-security-group domaincontroller-nsg
+```
+
+This how you can create VM:
+```powershell
+az vm create -n ad-dc-vm `
+    -g ad-dc-rg `
+    --image Win2016Datacenter `
+    --size Standard_DS1_v2 `
+    --admin-username labuser `
+    --admin-password Azure12345678 `
+    --public-ip-address '""' `
+    --private-ip-address 10.0.1.10 `
+    --nsg '""' `
+    --subnet $subnetId `
+    --data-disk-sizes-gb 32
+```
+
 Make sure you can connect to ad-dc-vm from jump-vm.
 
-Format additional data disk and install Domain Controller on ad-dc-vm and setup DNS server.
+Format additional data disk and install Domain Controller on ad-dc-vm and setup DNS server. You can run following script inside of VM. After role is installed server will reboot. Reconnect and continue with setting up DNS forwarder.
 
-Update DNS settings in VNET to point to ad-dc-vm.
+```powershell
+### Format data disk
+Get-Disk |
+Where partitionstyle -eq raw |
+Initialize-Disk -PartitionStyle MBR -PassThru |
+New-Partition -AssignDriveLetter -UseMaximumSize |
+Format-Volume -FileSystem NTFS -NewFileSystemLabel datadisk2 -Confirm:$false
+
+### Install domain controller
+Install-WindowsFeature AD-Domain-Services
+Import-Module ADDSDeployment
+Install-ADDSForest `
+-CreateDnsDelegation:$false `
+-DatabasePath "F:\Windows\NTDS" `
+-DomainMode "Win2012R2" `
+-DomainName "corp.stack.com" `
+-DomainNetbiosName "CORP" `
+-ForestMode "Win2012R2" `
+-InstallDns:$true `
+-LogPath "F:\Windows\NTDS" `
+-NoRebootOnCompletion:$false `
+-SysvolPath "F:\Windows\SYSVOL" `
+-Force:$true
+
+### After VM is rebooted setup DNS forwarder to 168.63.129.16
+Set-DnsServerForwarder -IPAddress "168.63.129.16" -PassThru
+```
+
+Update DNS settings in VNET to point to ad-dc-vm using GUI or CLI.
 
 ## Step 5 - prepare image for backend
-Use CLI to prepare Network Security Group for backend subnet. Deny all RDP traffic except from jump subnet. 
+Use CLI to prepare Network Security Group app-nsg for backend subnet. Deny all RDP traffic except from jump subnet. 
 
 Create Resource Group named imageprepare-rg and images-rg.
 
 Use CLI to create VM named appimage-vm in imageprepare-rg in backend subnet using Windows base image.
 
-Connect to VM and install Chrome. Use sysprep, capture image and store it in images-rg. Delete Resource Group imageprepare-rg.
+Connect to VM and install [Azure Data Studio](https://go.microsoft.com/fwlink/?linkid=2094200). Use sysprep, capture image and store it in images-rg. Delete Resource Group imageprepare-rg.
 
 ## Step 6 - create app-01-vm virtual machine
+Create Resource Group app-rg.
+
 Create Availability Set names app-as.
 
-Create VM app-01-vm using your custom image in backend subnet, images-rg Resource Group and place in app-as using GUI.
+Create VM app-01-vm using your custom image in backend subnet, app-rg Resource Group and place in app-as using GUI.
 
 Connect to VM and join it to domain.
 
 ## Step 7 - create app-02-vm and automatically join it to domain
-Create VM app-03-vm using your custom image in backend subnet, images-rg Resource Group and place in app-as using CLI.
+Use CLI to create VM app-02-vm using your custom image in backend subnet, app-rg Resource Group and place in app-as using CLI.
 
 Use Join VM extension to automatically join VM to domain.
 

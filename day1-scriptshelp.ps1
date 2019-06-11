@@ -108,4 +108,66 @@ Set-DnsServerForwarder -IPAddress "168.63.129.16" -PassThru
 
 ### Disconnect from VM. Following commands will be applied back on your notebook.
 
-az network vnet update -g net-rk -n net --dns-servers 10.0.1.10
+az network vnet update -g net-rg -n net --dns-servers 10.0.1.10
+
+# Step 5
+## NSG
+az network nsg create -n app-nsg -g net-rg
+az network nsg rule create -g net-rg `
+    --nsg-name app-nsg `
+    -n DenyRDP `
+    --priority 100 `
+    --source-address-prefixes 10.0.0.0/24 `
+    --source-port-ranges '*' `
+    --destination-address-prefixes '*' `
+    --destination-port-ranges 3389 `
+    --access Allow `
+    --protocol Tcp `
+    --description "Allow RDP from jump subnet"
+az network nsg rule create -g net-rg `
+    --nsg-name app-nsg `
+    -n AllowRDPFromJump `
+    --priority 110 `
+    --source-address-prefixes '*' `
+    --source-port-ranges '*' `
+    --destination-address-prefixes '*' `
+    --destination-port-ranges 3389 `
+    --access Deny `
+    --protocol Tcp `
+    --description "Deny RDP traffic"
+az network vnet subnet update -g net-rg `
+    -n backend `
+    --vnet-name net `
+    --network-security-group app-nsg
+
+## Resource Groups
+az group create -n imageprepare-rg -l $region
+az group create -n images-rg -l $region
+
+## Create VM
+$subnetId = $(az network vnet subnet show -g net-rg --name backend --vnet-name net --query id -o tsv)
+az vm create -n appimage-vm `
+    -g imageprepare-rg `
+    --image Win2016Datacenter `
+    --size Standard_DS1_v2 `
+    --admin-username labuser `
+    --admin-password Azure12345678 `
+    --public-ip-address '""' `
+    --private-ip-address 10.0.3.100 `
+    --nsg '""' `
+    --subnet $subnetId
+
+## Connect to VM and install Azure Data Studio
+Invoke-WebRequest https://go.microsoft.com/fwlink/?linkid=2094200 -OutFile datastudio.exe
+.\datastudio.exe /SILENT
+
+## Use sysprep to generalize OS
+C:\Windows\system32\Sysprep\sysprep.exe /oobe /shutdown /generalize
+
+## Capture and store image
+az vm deallocate -g imageprepare-rg -n appimage-vm
+az vm generalize -g imageprepare-rg -n appimage-vm
+az image create -g images-rg `
+    -n app-image `
+    --source $(az vm show -g imageprepare-rg -n appimage-vm --query id -o tsv)
+az group delete -n imageprepare-rg -y --no-wait
