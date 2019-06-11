@@ -88,7 +88,7 @@ New-Partition -AssignDriveLetter -UseMaximumSize |
 Format-Volume -FileSystem NTFS -NewFileSystemLabel datadisk2 -Confirm:$false
 
 ### Install domain controller
-Install-WindowsFeature AD-Domain-Services
+Install-WindowsFeature AD-Domain-Services -IncludeManagementTools
 Import-Module ADDSDeployment
 Install-ADDSForest `
 -CreateDnsDelegation:$false `
@@ -189,3 +189,24 @@ az vm create -n app-01-vm `
 
 ## Connect to VM and use PowerShell to join it to domain
 Add-Computer -DomainName corp.stack.com -Restart
+
+# Step 7
+az vm create -n app-02-vm `
+    -g app-rg `
+    --image $(az image show -g images-rg -n app-image --query id -o tsv) `
+    --size Standard_DS1_v2 `
+    --admin-username labuser `
+    --admin-password Azure12345678 `
+    --public-ip-address '""' `
+    --nsg '""' `
+    --subnet $(az network vnet subnet show -g net-rg --name backend --vnet-name net --query id -o tsv) `
+    --availability-set app-as
+
+## Use VM Extension to automatically join domain
+az vm extension set -n JsonADDomainExtension `
+    --publisher "Microsoft.Compute" `
+    --version "1.3" `
+    --vm-name app-02-vm `
+    -g app-rg `
+    --settings '{\"Name\":\"corp.stack.com\", \"User\":\"labuser@corp.stack.com\", \"Restart\":\"true\", \"OUPath\":\"\", \"Options\":3}' `
+    --protected-settings '{\"Password\":\"Azure12345678\"}'
