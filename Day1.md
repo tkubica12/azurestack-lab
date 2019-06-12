@@ -251,8 +251,61 @@ It will take some time for solution to gather details about our environment, so 
 
 ## Step 14 - use serverless to react on message in Queue
 
-## Step 15 - automate environment using basic ARM template
+## Step 15 - automate networking environment using basic ARM template
+Deploy ARM template with VNET, one subnet and one NSG.
 
-## Step 16 - more advanced example of using ARM to automate everything
+```powershell
+$region = local # $region = "westeurope"
+az group create -n arm-net-rg -l $region
+az group deployment create -g arm-net-rg `
+    --template-file networking.json
+```
 
-## Step 17 - learn how to use Azure Monitor with Azure Stack
+Modify template to add the following:
+- "app" subnet with range 10.1.1.0/24
+- "web" subnet with range 10.1.2.0/24
+- "app-nsq" to allow RDP access only from jump subnet
+- "web-nsg" to allow RDP access only from jump subnet and HTTP from anywhere
+
+Do this step by step and always ensure template is deployable. Since template is desired state you can apply it over and over.
+```powershell
+az group deployment create -g arm-net-rg `
+    --template-file networking.json
+```
+
+After you are done make sure you have not missed proper dependsOn configuration by deleting resource group and deploying complete solution again.
+```powershell
+az group delete -n arm-net-rg -y
+az group create -n arm-net-rg -l $region
+az group deployment create -g arm-net-rg `
+    --template-file networking.json
+```
+
+## Step 16 - automate jump server creation with ARM template
+Use template jump.json in arm-lab folder to deploy jump server, but there are few issues we want to fix. First let's try deployment.
+```powershell
+az group create -n arm-jump-rg -l $region
+az group deployment create -g arm-jump-rg `
+    --template-file jump.json `
+    --parameters vnetName=arm-net `
+    --parameters vnetResourceGroupName=arm-net-rg `
+    --parameters subnetName=jump
+```
+
+There are few problems with this template. Solve it one by one:
+1. Deployment fails due to error. Troubleshoot in Deployment section of GUI on Resource Group. Find reason and fix it.
+2. Public IP is created, but not associated with NIC. Solve that and redeploy template. Find solution in documentation, quickstart template examples or configure association manualy in GUI and use Resource Explorer to find out, how syntax looks like (then tweek ARM template, remove association in GUI and redeploy).
+3. VM username is hardcoded. Make it parameter and redeploy (submit the same name of labuser as changing name via ARM template is not possible without deleting resource first).
+4. VM size is hardcoded, make it parameter, but do not allow for any VM size - allow just Standard_DS1_v2 and Standard_DS2_v2 and redeploy.
+
+In fix for problem number 2 have you used dependsOn so deployment does not fail when running from scratch?
+
+Check how it looks when you would deploy template via GUI.
+
+## Step 17 - automate creation of multiple app servers in Availability Set with ARM template
+
+## Step 18 - automate creation of web farm with VMSS, Load Balancer and OS provisioning with PowerShell DSC
+
+## Step 19 - put everything together with master template
+
+## Step 20 - cleanup all resources
