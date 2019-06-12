@@ -317,15 +317,15 @@ az vmss update-instances --instance-ids '*' `
     -g web-rg
 
 # Step 20 - cleanup
-az group delete ad-dc-rg -y --no-wait
-az group delete images-rg -y --no-wait
-az group delete jump-rg -y --no-wait
-az group delete app-rg -y --no-wait
-az group delete web-rg -y --no-wait
-az group delete arm-jump-rg -y --no-wait
-az group delete arm-app-rg -y --no-wait
-az group delete arm-web-rg -y --no-wait
+az group delete -n ad-dc-rg -y --no-wait
+az group delete -n images-rg -y --no-wait
+az group delete -n jump-rg -y --no-wait
+az group delete -n app-rg -y --no-wait
+az group delete -n web-rg -y --no-wait
+az group delete -n arm-jump-rg -y --no-wait
+az group delete -n arm-app-rg -y --no-wait
+az group delete -n arm-web-rg -y --no-wait
 
 ## Wait for all previous resource groups to be deleted and then destroy net-rg
-az group delete net-rg -y --no-wait
-az group delete arm-net-rg -y --no-wait
+az group delete -n net-rg -y --no-wait
+az group delete -n arm-net-rg -y --no-wait
