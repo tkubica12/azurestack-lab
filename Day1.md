@@ -264,7 +264,7 @@ az group deployment create -g arm-net-rg `
 Modify template to add the following:
 - "app" subnet with range 10.1.1.0/24
 - "web" subnet with range 10.1.2.0/24
-- "app-nsq" to allow RDP access only from jump subnet
+- "app-nsq" to allow RDP access only from jump **subnet**
 - "web-nsg" to allow RDP access only from jump subnet and HTTP from anywhere
 
 Do this step by step and always ensure template is deployable. Since template is desired state you can apply it over and over.
@@ -302,7 +302,71 @@ In fix for problem number 2 have you used dependsOn so deployment does not fail 
 
 Check how it looks when you would deploy template via GUI.
 
-## Step 17 - automate creation of multiple app servers in Availability Set with ARM template
+## Step 17 - automate creation of multiple app servers in Availability Set and internal load balancer with ARM template
+
+We will use template in arm-lab folder called app.json to deploy multiple servers in Availability Set and behind load balancer with private IP. Template is designed to deploy any number of servers using copy loops with count being parameter.
+
+```powershell
+az group create -n arm-app-rg -l $region
+az group deployment create -g arm-app-rg `
+    --template-file app.json `
+    --parameters vnetName=arm-net `
+    --parameters vnetResourceGroupName=arm-net-rg `
+    --parameters subnetName=app `
+    --parameters adminUsername=labuser `
+    --parameters adminPassword=Azure12345678 `
+    --parameters vmSize=Standard_DS1_v2 `
+    --parameters count=2
+```
+
+Again there are few problems with this template:
+1. Deployment fails. Investigate what is going on and fix it.
+2. Load balancer is created, but there is no VM in backend pool. Fix it.
+
+Let's now redeploy final template with increased count of VMs. We expect existing VMs will not be touched, but one additional will be created in availability set and added to load balancing pool.
+
+```powershell
+az group deployment create -g arm-app-rg `
+    --template-file app.json `
+    --parameters vnetName=arm-net `
+    --parameters vnetResourceGroupName=arm-net-rg `
+    --parameters subnetName=app `
+    --parameters adminUsername=labuser `
+    --parameters adminPassword=Azure12345678 `
+    --parameters vmSize=Standard_DS1_v2 `
+    --parameters count=3
+```
+
+Investigate what happens if we now redeploy with low count.
+
+```powershell
+az group deployment create -g arm-app-rg `
+    --template-file app.json `
+    --parameters vnetName=arm-net `
+    --parameters vnetResourceGroupName=arm-net-rg `
+    --parameters subnetName=app `
+    --parameters adminUsername=labuser `
+    --parameters adminPassword=Azure12345678 `
+    --parameters vmSize=Standard_DS1_v2 `
+    --parameters count=2
+```
+
+As you will shorty ARM have not removed 3rd server. This is because default deployment command is using Incremental mode to prevent beginners to accidentaly delete resources they have not intended to. But we know what we are doing so will run this in pure desired state mode (Complete) where resources that exist in Azure, but are not covered by template, are going to be deleted.
+
+```powershell
+az group deployment create -g arm-app-rg `
+    --template-file app.json `
+    --parameters vnetName=arm-net `
+    --parameters vnetResourceGroupName=arm-net-rg `
+    --parameters subnetName=app `
+    --parameters adminUsername=labuser `
+    --parameters adminPassword=Azure12345678 `
+    --parameters vmSize=Standard_DS1_v2 `
+    --parameters count=2 `
+    --mode Complete
+```
+
+Be careful with mode Complete. It is powerful and pure desired state, but can be risky for beginners.
 
 ## Step 18 - automate creation of web farm with VMSS, Load Balancer and OS provisioning with PowerShell DSC
 

@@ -1,0 +1,213 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "adminPassword": {
+            "type": "securestring",
+            "metadata": {
+                "description": "The password for the Administrator account of the new VMs. Default value is subscription id"
+            }
+        },
+        "adminUsername": {
+            "type": "string",
+            "metadata": {
+                "description": "Admin user name for VM"
+            }
+        },
+        "vnetName": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of VNET to place VM into"
+            }
+        },
+        "vnetResourceGroupName": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of Resource Group where VNET is present"
+            }
+        },
+        "subnetName": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of subnet to place VM into"
+            }
+        },
+        "vmSize": {
+            "type": "string",
+            "allowedValues": [
+                "Standard_DS1_v2",
+                "Standard_DS2_v2"
+            ],
+            "metadata": {
+                "description": "Select VM size"
+            }
+        },
+        "count": {
+            "type": "int",
+            "metadata": {
+                "description": "Number of servers to create"
+            }
+        }
+    },
+    "variables": {
+        "windowsOSVersion": "2016-Datacenter",
+        "imagePublisher": "MicrosoftWindowsServer",
+        "imageOffer": "WindowsServer",
+        "objectsPrefix": "app",
+        "vmName": "[concat(variables('objectsPrefix'), '-vm-')]",
+        "nicName": "[concat(variables('objectsPrefix'), '-nic-')]",
+        "asName": "[concat(variables('objectsPrefix'), '-as')]",
+        "lbName": "[concat(variables('objectsPrefix'), '-lb')]",
+        "subnetId": "[resourceId(parameters('vnetResourceGroupName'), 'Microsoft.Network/virtualNetworks/subnets', parameters('vnetName'), parameters('subnetName'))]"
+    },
+    "resources": [
+        {
+            "name": "[variables('lbName')]",
+            "type": "Microsoft.Network/loadBalancers",
+            "apiVersion": "2017-10-01",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "frontendIPConfigurations": [
+                    {
+                        "name": "frontend",
+                        "properties": {
+                            "privateIPAddress": "10.1.1.100",
+                            "privateIPAllocationMethod": "Static",
+                            "subnet": {
+                                "id": "[variables('subnetId')]"
+                            }
+                        }
+                    }
+                ],
+                "backendAddressPools": [
+                    {
+                        "name": "LoadBalancerBackend"
+                    }
+                ],
+                "loadBalancingRules": [
+                    {
+                        "properties": {
+                            "frontendIPConfiguration": {
+                                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('lbName')), '/frontendIpConfigurations/frontend')]"
+                            },
+                            "backendAddressPool": {
+                                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('lbName')), '/backendAddressPools/loadBalancerBackEnd')]"
+                            },
+                            "probe": {
+                                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('lbName')), '/probes/lbprobe')]"
+                            },
+                            "protocol": "Tcp",
+                            "frontendPort": 80,
+                            "backendPort": 80,
+                            "idleTimeoutInMinutes": 15
+                        },
+                        "name": "lbrule"
+                    }
+                ],
+                "probes": [
+                    {
+                        "properties": {
+                            "protocol": "Tcp",
+                            "port": 80,
+                            "intervalInSeconds": 15,
+                            "numberOfProbes": 2
+                        },
+                        "name": "lbprobe"
+                    }
+                ]
+            }
+        },
+        {
+            "type": "Microsoft.Compute/availabilitySets",
+            "name": "[variables('asName')]",
+            "apiVersion": "2017-12-01",
+            "location": "[resourceGroup().location]",
+            "sku": {
+                "name": "Aligned"
+            },
+            "properties": {
+                "platformFaultDomainCount": 3,
+                "platformUpdateDomainCount": 3
+            }
+        },
+        {
+            "type": "Microsoft.Network/networkInterfaces",
+            "name": "[concat(variables('nicName'), copyIndex(1))]",
+            "apiVersion": "2017-10-01",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/loadBalancers', variables('lbName'))]"
+            ],
+            "copy": {
+                "name": "nicLoop",
+                "count": "[parameters('count')]"
+            },
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig1",
+                        "properties": {
+                            "privateIPAllocationMethod": "Dynamic",
+                            "subnet": {
+                                "id": "[variables('subnetId')]"
+                            },
+                            "loadBalancerBackendAddressPools": [
+                                {
+                                    "id": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', variables('lbName'), 'LoadBalancerBackend')]"
+                                }
+                            ]
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "type": "Microsoft.Compute/virtualMachines",
+            "name": "[concat(variables('vmName'), copyIndex(1))]",
+            "apiVersion": "2017-12-01",
+            "copy": {
+                "name": "vmLoop",
+                "count": "[parameters('count')]"
+            },
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "nicLoop",
+                "[resourceId('Microsoft.Compute/availabilitySets', variables('asName'))]"
+            ],
+            "properties": {
+                "availabilitySet": {
+                    "id": "[resourceId('Microsoft.Compute/availabilitySets',variables('asName'))]"
+                },
+                "hardwareProfile": {
+                    "vmSize": "[parameters('vmSize')]"
+                },
+                "osProfile": {
+                    "computerName": "[variables('vmName')]",
+                    "adminUsername": "[parameters('adminUsername')]",
+                    "adminPassword": "[parameters('adminPassword')]"
+                },
+                "storageProfile": {
+                    "imageReference": {
+                        "publisher": "[variables('imagePublisher')]",
+                        "offer": "[variables('imageOffer')]",
+                        "sku": "[variables('windowsOSVersion')]",
+                        "version": "latest"
+                    },
+                    "osDisk": {
+                        "name": "[concat(variables('vmName'), 'osdisk-', copyIndex(1))]",
+                        "caching": "ReadWrite",
+                        "createOption": "FromImage"
+                    }
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(variables('nicName'), copyIndex(1)))]"
+                        }
+                    ]
+                }
+            }
+        }
+    ],
+    "outputs": {}
+}
