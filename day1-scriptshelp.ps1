@@ -1,6 +1,11 @@
 # Connect
+az cloud register -n AzureStackUser `
+    --endpoint-resource-manager "https://management.local.azurestack.external" `
+    --suffix-storage-endpoint "local.azurestack.external" `
+    --suffix-keyvault-dns ".vault.local.azurestack.external"
+az cloud set -n AzureStackUser
+az cloud update --profile 2019-03-01-hybrid
 az login
-az account set --subscription tokubica
 
 # Step 2
 $region = "local"   # $region = "westeurope" 
@@ -9,19 +14,19 @@ az network vnet create -n net -g net-rg --address-prefix 10.0.0.0/16
 az network vnet subnet create -n jump `
     -g net-rg `
     --vnet-name net `
-    --address-prefixes 10.0.0.0/24
+    --address-prefix 10.0.0.0/24
 az network vnet subnet create -n domaincontroller `
     -g net-rg `
     --vnet-name net `
-    --address-prefixes 10.0.1.0/24
+    --address-prefix 10.0.1.0/24
 az network vnet subnet create -n webfarm `
     -g net-rg `
     --vnet-name net `
-    --address-prefixes 10.0.2.0/24
+    --address-prefix 10.0.2.0/24
 az network vnet subnet create -n backend `
     -g net-rg `
     --vnet-name net `
-    --address-prefixes 10.0.3.0/24
+    --address-prefix 10.0.3.0/24
 
 # Step 3
 az group create -n jump-rg -l $region
@@ -184,7 +189,7 @@ az vm create -n app-01-vm `
     --admin-password Azure12345678 `
     --public-ip-address '""' `
     --nsg '""' `
-    --subnet $(az network vnet subnet show -g net-rg --name backend --vnet-name net --query id -o tsv) `
+    --subnet --subnet
     --availability-set app-as
 
 ## Connect to VM and use PowerShell to join it to domain
@@ -255,9 +260,23 @@ az network vnet subnet update -g net-rg `
 ## Create Virtual Machine Scale Set
 az group create -n web-rg -l $region
 
+az vmss create -n webscaleset `
+    -g web-rg `
+    --image UbuntuLTS `
+    --instance-count 2 `
+    --vm-sku Standard_DS1_v2 `
+    --admin-username labuser `
+    --admin-password Azure12345678 `
+    --authentication-type password `
+    --public-ip-address web-lb-ip `
+    --subnet $(az network vnet subnet show -g net-rg --name webfarm --vnet-name net --query id -o tsv) `
+    --lb web-lb
+
 ## Create storage account and upload scripts
 $storageName = "myuniquename1919"
-az storage account create -n $storageName -g web-rg
+az storage account create -n $storageName `
+    -g web-rg `
+    --sku Standard_LRS
 az storage container create -n deploy `
     --connection-string $(az storage account show-connection-string -n $storageName -g web-rg -o tsv)
 az storage blob upload -f scripts/app-v1.sh `

@@ -229,13 +229,15 @@ az vmss update-instances --instance-ids '*' `
 ```
 
 ## Step 9 - monitor using Azure services
-Open Azure portal and prepare monitoring environment:
-- Create Log Analytics workspace and write down workspace ID and key
-- Configure gathering syslog and Event logs
-- Configure gathering telemetry for Windows and Linux
-- Create Automation Account
-- Enable Update Management, Inventory and Change Tracking in automation account
-- Onboard to VM Health solution
+To ease setup of monitoring environment in Azure use ARM template in monitoring folder:
+- In your Azure environment click + and search for Template Deployment
+- Click Edit Template and copy contents of deploy.json file there
+- Enter parameters such as resource group, globaly unique workspace name (eg. mynameworkspace7913) and automation account name
+- Deploy template
+
+Template will configure Log Analytics workspace, telemetry gathering, logs gathering, automation account, update management solution, inventory and change tracking, VM Health solution and dependency map.
+
+In Azure portal click on Log Analytics workspace that has been created, go to Advance settings and write down Workspace ID and Workspace Key.
 
 In Azure Stack add Azure Monitor extension and Dependency extension to all your VMs.
 
@@ -255,7 +257,7 @@ It will take some time for solution to gather details about our environment, so 
 Deploy ARM template with VNET, one subnet and one NSG.
 
 ```powershell
-$region = local # $region = "westeurope"
+$region = "local" # $region = "westeurope"
 az group create -n arm-net-rg -l $region
 az group deployment create -g arm-net-rg `
     --template-file networking.json
