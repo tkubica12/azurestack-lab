@@ -372,6 +372,102 @@ Be careful with mode Complete. It is powerful and pure desired state, but can be
 
 ## Step 18 - automate creation of web farm with VMSS, Load Balancer and OS provisioning with PowerShell DSC
 
-## Step 19 - put everything together with master template
+Web farm will consist of set of identical servers and in order to easily upgrade we will use Virtual Machine Scale Set. This time we use Windows OS and PowerShell DSC to automate installation of web server (IIS).
 
-## Step 20 - cleanup all resources
+For installation see IIS.ps1. We need to zip it and store in storage account so deployment process can access it. Let's prepare deployment repository, upload files and get read only token.
+
+```powershell
+# Create Resource Group
+az group create -n arm-repo -l $region
+
+# Create Storage Account and get connection string
+$storageName = "tomasuniquename123"
+az storage account create -g arm-repo -l $region -n $storageName
+$storageConnectionString = $(az storage account show-connection-string -g arm-repo -n $storageName -o tsv)
+
+# Create storage container
+az storage container create -n deploy --connection-string $storageConnectionString
+
+# Package IIS.ps1 to zip file
+Compress-Archive -Path IIS.ps1 -DestinationPath IIS.zip
+
+# Upload zip file to storage container
+az storage blob upload -f IIS.zip `
+    -c deploy `
+    -n IIS.zip `
+    --connection-string $storageConnectionString
+```
+
+Template contains quite a lot of parameters so let them store in parameters file rather than inside CLI command. Make sure you update web.parameters.json with your values for baseUrl and generate storage token with this command:
+
+```powershell
+az storage container generate-sas -n deploy `
+    --connection-string $storageConnectionString `
+    --https-only `
+    --permissions r `
+    --expiry "2030-1-1T00:00Z" `
+    -o tsv
+```
+
+We have not specified adminPassword in file. It is not good practice to store sensitive values in deployment files so we will assign adminPassword via CLI (note storageToken might be also considered sensitive, but we will solve that later).
+
+```powershell
+az group create -n arm-web-rg -l $region
+az group deployment create -g arm-web-rg `
+    --template-file web.json `
+    --parameters "@web.parameters.json" `
+    --parameters adminPassword=Azure12345678
+```
+
+## Step 19 - put everything together with master template
+At this point we have automated a lot of task to build our solution, but each component is separate template and we need to run them in correct order. In this step we will automate even that by creating master template.
+
+In previous step we have created deployment repo in arm-deploy resource group. We will use our storage account to store templates we have prepared so far.
+
+```powershell
+$storageConnectionString = $(az storage account show-connection-string -g arm-repo -n $storageName -o tsv)
+
+az storage blob upload -f web.json `
+    -c deploy `
+    -n web.json `
+    --connection-string $storageConnectionString
+az storage blob upload -f networking.json `
+    -c deploy `
+    -n networking.json `
+    --connection-string $storageConnectionString
+az storage blob upload -f jump.json `
+    -c deploy `
+    -n jump.json `
+    --connection-string $storageConnectionString
+az storage blob upload -f app.json `
+    -c deploy `
+    -n app.json `
+    --connection-string $storageConnectionString
+```
+
+Master template will call linked templates in storage. Make sure web, jump and app are deployed in parallel, but all depend on networking. Master template will have all parameters and will pass them to linked templates.
+
+First let's create resource groups for new environment.
+
+```powershell
+$resourceGroupPrefix = "arm2"
+az group create -n $resourceGroupPrefix-web-rg -l $region
+az group create -n $resourceGroupPrefix-app-rg -l $region
+az group create -n $resourceGroupPrefix-jump-rg -l $region
+az group create -n $resourceGroupPrefix-net-rg -l $region
+```
+
+Modify master.parameters.json with your storage account URL and token as we did in previous step. Let's deploy master template.
+
+```powershell
+az group deployment create -g $resourceGroupPrefix-net-rg `
+    --template-file master.json `
+    --parameters "@master.parameters.json" `
+    --parameters adminPassword=Azure12345678
+```
+
+Note that template currently covers only networking, jump and app, but not web.json template. **Fix it.**
+
+## Step 20 - securing secrets with Azure Key Vault
+
+## Step 21 - cleanup all resources

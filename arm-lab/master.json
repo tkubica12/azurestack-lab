@@ -1,0 +1,179 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json",
+    "contentVersion": "1.0.0.0",
+    "apiProfile": "2018-03-01-hybrid",
+    "parameters": {
+        "adminPassword": {
+            "type": "securestring",
+            "metadata": {
+                "description": "The password for the Administrator account of the new VMs. Default value is subscription id"
+            }
+        },
+        "adminUsername": {
+            "type": "string",
+            "metadata": {
+                "description": "Admin user name for VM"
+            }
+        },
+        "jumpVmSize": {
+            "type": "string",
+            "allowedValues": [
+                "Standard_DS1_v2",
+                "Standard_DS2_v2"
+            ],
+            "metadata": {
+                "description": "Select VM size"
+            }
+        },
+        "appVmSize": {
+            "type": "string",
+            "allowedValues": [
+                "Standard_DS1_v2",
+                "Standard_DS2_v2"
+            ],
+            "metadata": {
+                "description": "Select VM size"
+            }
+        },
+        "webVmSize": {
+            "type": "string",
+            "allowedValues": [
+                "Standard_DS1_v2",
+                "Standard_DS2_v2"
+            ],
+            "metadata": {
+                "description": "Select VM size"
+            }
+        },
+        "appCount": {
+            "type": "int",
+            "metadata": {
+                "description": "Number of servers to create"
+            }
+        },
+        "webCount": {
+            "type": "int",
+            "metadata": {
+                "description": "Number of servers to create"
+            }
+        },
+        "resourceGroupPrefix": {
+            "type": "string",
+            "metadata": {
+                "description": "Resource group prefix, eg. when arm2 prefix is use, arm2-web-rg will be created"
+            }
+        },
+        "baseUrl": {
+            "type": "string",
+            "metadata": {
+                "description": "Link to storage account and container"
+            }
+        },
+        "storageToken": {
+            "type": "string",
+            "metadata": {
+                "description": "SAS token to access storage"
+            }
+        }
+    },
+    "variables": {
+        "networkingUrl": "[concat(parameters('baseUrl'), 'networking.json?', parameters('storageToken'))]",
+        "webUrl": "[concat(parameters('baseUrl'), 'web.json?', parameters('storageToken'))]",
+        "appUrl": "[concat(parameters('baseUrl'), 'app.json?', parameters('storageToken'))]",
+        "jumpUrl": "[concat(parameters('baseUrl'), 'jump.json?', parameters('storageToken'))]",
+        "rgNet":  "[concat(parameters('resourceGroupPrefix'), '-net-rg')]",
+        "rgJump":  "[concat(parameters('resourceGroupPrefix'), '-jump-rg')]",
+        "rgApp":  "[concat(parameters('resourceGroupPrefix'), '-app-rg')]",
+        "rgWeb":  "[concat(parameters('resourceGroupPrefix'), '-web-rg')]"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2018-05-01",
+            "name": "networking",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[variables('networkingUrl')]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {}
+            }
+        },
+        {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2018-05-01",
+            "resourceGroup": "[variables('rgJump')]",
+            "name": "jump",
+            "dependsOn": [
+                "networking"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[variables('jumpUrl')]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "adminUsername": {
+                        "value": "[parameters('adminUsername')]"
+                    },
+                    "adminPassword": {
+                        "value": "[parameters('adminPassword')]"
+                    },
+                    "vnetName": {
+                        "value": "arm-net"
+                    },
+                    "vnetResourceGroupName": {
+                        "value": "[variables('rgNet')]"
+                    },
+                    "subnetName": {
+                        "value": "jump"
+                    },
+                    "vmSize": {
+                        "value": "[parameters('jumpVmSize')]"
+                    }
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2018-05-01",
+            "resourceGroup": "[variables('rgApp')]",
+            "name": "app",
+            "dependsOn": [
+                "networking"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[variables('appUrl')]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "adminUsername": {
+                        "value": "[parameters('adminUsername')]"
+                    },
+                    "adminPassword": {
+                        "value": "[parameters('adminPassword')]"
+                    },
+                    "vnetName": {
+                        "value": "arm-net"
+                    },
+                    "vnetResourceGroupName": {
+                        "value": "[variables('rgNet')]"
+                    },
+                    "subnetName": {
+                        "value": "app"
+                    },
+                    "vmSize": {
+                        "value": "[parameters('appVmSize')]"
+                    },
+                    "count": {
+                        "value": "[parameters('appCount')]"
+                    }
+                }
+            }
+        }
+    ]
+}

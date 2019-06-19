@@ -1,0 +1,36 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "adminUsername": {
+            "value": "labuser"
+        },
+        "adminPassword": {
+            "value": "Azure12345678"
+        },
+        "jumpVmSize": {
+            "value": "Standard_DS1_v2"
+        },
+        "appVmSize": {
+            "value": "Standard_DS1_v2"
+        },
+        "webVmSize": {
+            "value": "Standard_DS1_v2"
+        },
+        "appCount": {
+            "value": 2
+        },
+        "webCount": {
+            "value": 2
+        },
+        "resourceGroupPrefix": {
+            "value": "arm2"
+        },
+        "baseUrl": {
+            "value": "https://tomasuniquename123.blob.core.windows.net/deploy/"
+        },
+        "storageToken": {
+            "value": "se=2030-01-01T00%3A00Z&sp=r&spr=https&sv=2018-03-28&sr=c&sig=vq%2BibITRD2rpP6A72pPzSd%2B%2BszLp9syEjkUGs1gRikg%3D"
+        }
+    }
+}
