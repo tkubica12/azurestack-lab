@@ -378,12 +378,12 @@ For installation see IIS.ps1. We need to zip it and store in storage account so 
 
 ```powershell
 # Create Resource Group
-az group create -n arm-repo -l $region
+az group create -n arm-repo-rg -l $region
 
 # Create Storage Account and get connection string
 $storageName = "tomasuniquename123"
-az storage account create -g arm-repo -l $region -n $storageName
-$storageConnectionString = $(az storage account show-connection-string -g arm-repo -n $storageName -o tsv)
+az storage account create -g arm-repo-rg -l $region -n $storageName
+$storageConnectionString = $(az storage account show-connection-string -g arm-repo-rg -n $storageName -o tsv)
 
 # Create storage container
 az storage container create -n deploy --connection-string $storageConnectionString
@@ -425,7 +425,7 @@ At this point we have automated a lot of task to build our solution, but each co
 In previous step we have created deployment repo in arm-deploy resource group. We will use our storage account to store templates we have prepared so far.
 
 ```powershell
-$storageConnectionString = $(az storage account show-connection-string -g arm-repo -n $storageName -o tsv)
+$storageConnectionString = $(az storage account show-connection-string -g arm-repo-rg -n $storageName -o tsv)
 
 az storage blob upload -f web.json `
     -c deploy `
@@ -471,14 +471,14 @@ Note that template currently covers only networking, jump and app, but not web.j
 ## Step 20 - securing secrets with Azure Key Vault
 Last point we want to solve is more secure way of managing secrets such as adminPassword and storageToken. We will store those in Azure Key Vault to provide strong security, RBAC, separated secrets management and ability to access secrets, keys and certificaties not only during deployment, but also from applications directly.
 
-In arm-repo resource group we will create Key Vault, enable access to it from ARM deployment process and store adminPassword there.
+In arm-repo-rg resource group we will create Key Vault, enable access to it from ARM deployment process and store adminPassword there.
 
 ```powershell
 # Create Key Vault and store secret
 $keyVaultName = "tomasuniquevault123"
 az keyvault create -l $region `
     -n $keyVaultName `
-    -g arm-repo `
+    -g arm-repo-rg `
      --enabled-for-template-deployment
 az keyvault secret set -n mojeHeslo `
     --vault-name $keyVaultName `
@@ -486,7 +486,7 @@ az keyvault secret set -n mojeHeslo `
 
 # Get Key Vault ID
 az keyvault show -n $keyVaultName `
-    -g arm-repo `
+    -g arm-repo-rg `
     --query id `
     -o tsv
 ```
@@ -497,7 +497,7 @@ Modify master.parameters.json to add adminPassword as reference to your Key Vaul
         "adminPassword": {
             "reference": {
               "keyVault": {
-                "id": "/subscriptions/mysubscriptionid/resourceGroups/arm-repo/providers/Microsoft.KeyVault/vaults/tomasuniquevault123"
+                "id": "/subscriptions/mysubscriptionid/resourceGroups/arm-repo-rg/providers/Microsoft.KeyVault/vaults/tomasuniquevault123"
               },
               "secretName": "mojeHeslo"
             }
@@ -523,6 +523,7 @@ az group delete -n images-rg -y --no-wait
 az group delete -n jump-rg -y --no-wait
 az group delete -n app-rg -y --no-wait
 az group delete -n web-rg -y --no-wait
+az group delete -n arm-repo-rg -y --no-wait
 az group delete -n arm-jump-rg -y --no-wait
 az group delete -n arm-app-rg -y --no-wait
 az group delete -n arm-web-rg -y --no-wait

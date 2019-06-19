@@ -341,6 +341,7 @@ az group delete -n images-rg -y --no-wait
 az group delete -n jump-rg -y --no-wait
 az group delete -n app-rg -y --no-wait
 az group delete -n web-rg -y --no-wait
+az group delete -n arm-repo-rg -y --no-wait
 az group delete -n arm-jump-rg -y --no-wait
 az group delete -n arm-app-rg -y --no-wait
 az group delete -n arm-web-rg -y --no-wait
