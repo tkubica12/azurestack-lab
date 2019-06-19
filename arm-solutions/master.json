@@ -203,7 +203,7 @@
                         "value": "[variables('rgNet')]"
                     },
                     "subnetName": {
-                        "value": "app"
+                        "value": "web"
                     },
                     "vmSize": {
                         "value": "[parameters('webVmSize')]"

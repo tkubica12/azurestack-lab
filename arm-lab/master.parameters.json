@@ -5,9 +5,6 @@
         "adminUsername": {
             "value": "labuser"
         },
-        "adminPassword": {
-            "value": "Azure12345678"
-        },
         "jumpVmSize": {
             "value": "Standard_DS1_v2"
         },

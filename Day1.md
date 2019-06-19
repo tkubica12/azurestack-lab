@@ -469,5 +469,49 @@ az group deployment create -g $resourceGroupPrefix-net-rg `
 Note that template currently covers only networking, jump and app, but not web.json template. **Fix it.**
 
 ## Step 20 - securing secrets with Azure Key Vault
+Last point we want to solve is more secure way of managing secrets such as adminPassword and storageToken. We will store those in Azure Key Vault to provide strong security, RBAC, separated secrets management and ability to access secrets, keys and certificaties not only during deployment, but also from applications directly.
+
+In arm-repo resource group we will create Key Vault, enable access to it from ARM deployment process and store adminPassword there.
+
+```powershell
+# Create Key Vault and store secret
+$keyVaultName = "tomasuniquevault123"
+az keyvault create -l $region `
+    -n $keyVaultName `
+    -g arm-repo `
+     --enabled-for-template-deployment
+az keyvault secret set -n mojeHeslo `
+    --vault-name $keyVaultName `
+    --value Azure12345678
+
+# Get Key Vault ID
+az keyvault show -n $keyVaultName `
+    -g arm-repo `
+    --query id `
+    -o tsv
+```
+
+Modify master.parameters.json to add adminPassword as reference to your Key Vault.
+
+```json
+        "adminPassword": {
+            "reference": {
+              "keyVault": {
+                "id": "/subscriptions/mysubscriptionid/resourceGroups/arm-repo/providers/Microsoft.KeyVault/vaults/tomasuniquevault123"
+              },
+              "secretName": "mojeHeslo"
+            }
+        }
+```
+
+Deploy template.
+
+```powershell
+az group deployment create -g $resourceGroupPrefix-net-rg `
+    --template-file master.json `
+    --parameters "@master.parameters.json"
+```
+
+Do the same for storageToken.
 
 ## Step 21 - cleanup all resources

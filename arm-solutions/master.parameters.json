@@ -6,7 +6,12 @@
             "value": "labuser"
         },
         "adminPassword": {
-            "value": "Azure12345678"
+            "reference": {
+                "keyVault": {
+                    "id": "/subscriptions/mysubscriptionid/resourceGroups/arm-repo/providers/Microsoft.KeyVault/vaults/tomasuniquevault123"
+                },
+                "secretName": "mojeHeslo"
+            }
         },
         "jumpVmSize": {
             "value": "Standard_DS1_v2"
