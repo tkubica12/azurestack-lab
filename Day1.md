@@ -301,8 +301,74 @@ Open Application Insights in Azure and try the following:
 * Investigate Usage section including Users, Sessions and User Flows
 
 ## Step 13 - use serverless to expose API endpoint and store messages in Queue
+We will create new Function App (serverless) via GUI. We can use Consumption hosting plan (running in shared plan), but as we already purchased App Service plan dedicated, let's run it there. Use .NET as language and let wizard create storage account.
+
+When environment is ready open it and click on + sign in Functions. Use wizard to select Webhook + API. There is sample code (you do not have to understand it at this point) that takes name as argument and responds with Hello <name>. Use Get function URL and copy it to clipboard. Open web browser and paste it in and add "&name=Tomas". Full URL might look something like this:
+
+```
+https://mojefunkce.appservice.local.azurestack.external/api/HttpTriggerCSharp1?code=aoBmARujcdaoUgaLIApy8KQOs1QzskpuDmIoKB7BtjV0KP5x/SM5Pg==&name=Tomas
+```
+
+This is our first working serverless function. No server to manage, no framework, no need to compile code.
+
+We will now want to create message in queue. There is PaaS service for that which is part of Storage account. We will reuse one already created for our Function. Note that in standard code you would need to authenticate against it and solve how to pass token etc. This will be handled by serverless platform, so we do not have to worry about that. Click on Integrate and + New Output. Select Azure Queue Storage and click Select. On next page we can modify names, but let's keep everything on defaults and click Save.
+
+Go back to HttpTriggerCSharp1 to open code. We will make simple modification to output name to queue. Replace existing code with this one:
+
+```
+using System.Net;
+
+public static async Task<HttpResponseMessage> Run(HttpRequestMessage req, TraceWriter log, ICollector<string> outputQueueItem)
+{
+    log.Info("C# HTTP trigger function processed a request.");
+
+    // parse query parameter
+    string name = req.GetQueryNameValuePairs()
+        .FirstOrDefault(q => string.Compare(q.Key, "name", true) == 0)
+        .Value;
+
+    if (name == null)
+    {
+        // Get request body
+        dynamic data = await req.Content.ReadAsAsync<object>();
+        name = data?.name;
+    }
+
+    outputQueueItem.Add("Name passed to the function: " + name);
+
+    return name == null
+        ? req.CreateResponse(HttpStatusCode.BadRequest, "Please pass a name on the query string or in the request body")
+        : req.CreateResponse(HttpStatusCode.OK, "Hello " + name);
+}
+```
+
+Generate some call as before via browser. Open your Storage Account, go to Queues and you should see messages there.
 
 ## Step 14 - use serverless to react on message in Queue and create file in Blob storage
+So far we have use HTTP call as trigger and sent output to Queue. We can also run TImer trigger or data related triggers run running code whenever there is new file in blob storage (eg. to run code to resize JPG) or react on message in queue. That is what we will try now.
+
+On Functions click on + sign and this time select Create your own function to select Queue Trigger using C# (click on C# in that box). As queue name type outqueue and click Save. There is sample code that will get message and write to log. Let's test it. Click on logs and keep Window open. You will probably see logs of existing messages being consumed. Go to browser and call our first function again. That will trigger first function that writes message to queue and new message will trigger our second function.
+
+Go to Integrate and click + New Output and this time select Azure Blob Storage, keep everything on defaults and click Save. Replace existing code with this one:
+
+```
+using System;
+
+public static void Run(string myQueueItem, TraceWriter log, out string outputBlob)
+{
+    log.Info($"C# Queue trigger function processed: {myQueueItem}");
+    outputBlob = myQueueItem;
+}
+```
+
+Generate new request for first function via browser. Open Storage Account, go to Blobs and you should see new file stored in outcontainer.
+
+Think about interesting scenarios with Azure Functions:
+* Wait for new JPG to be stored in Blob storage and resize to multiple sizes for different screens
+* Get requests from application and store in queue, so application can continue on other tasks. Have queue trigger to run background task to process message (eg. create order etc.)
+* Upload CSV files to Blob storage and have it trigger Function to process CSV and store in database or do filtering.
+* Have IoT sensor messages come to queue (or in future Event Hub) and use Function to process messages (parsing, conversion etc.)
+* Think about hybrid scenarios - for example you can collect messages in Azure Stack and trigger function to filter interesting events and send them to Azure Blob Storage for advanced processing in public cloud. Or you can user public cloud Azure to build IoT platform and use Functions in public cloud to process RAW data, but send converted data to Azure Stack Queue, where you trigger Azure Stack Functions to process it and store in local database in Azure Stack.
 
 ## Step 15 - automate networking environment using basic ARM template
 Deploy ARM template with VNET, one subnet and one NSG.
