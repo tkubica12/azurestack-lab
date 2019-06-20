@@ -243,15 +243,66 @@ In Azure Stack add Azure Monitor extension and Dependency extension to all your 
 
 It will take some time for solution to gather details about our environment, so we will come later to check results.
 
-## Step 10 - create and scale WebApp using PaaS
+## Step 10 - create and scale WebApp using PaaS and use Deployment Slots to manage versions
+Usign GUI create Web App named <yourname>-app1 on new Service Plan on Production tier S1. Open Web App page and click on URL - you should see dafult page of your future application.
 
-## Step 11 - enable application monitoring with Application Insights in Azure
+Go to App Service Editor (Preview) and in WWWROOT folder use right click to create file index.html with "My great app" inthere. Refresh URL of your application - you should see you static web up and running.
 
-## Step 12 - add testing environment and canary release using Deployment Slots
+Let's now see how you can create additional environments and easily test and release new versions of your application. Go to Deployment slots and click Add Slot. Call it "test" and Do not clone settings.
 
-## Step 13 - use serverless to process objects in Blob Storage
+Click on new slot and go to App Service Editor (Preview) and create index.html with content "New version of my great app".
 
-## Step 14 - use serverless to react on message in Queue
+In Overview section find URL of your test version and open it. You next-version application is running fine.
+
+Go back to deployment slots and configure 20% of users to hit test version and click Save. Now 20% of users will go to new version. In order for single user to not switch randomly platform uses cookie-based session persistence and browser is holding it. In order to test probability of hitting new version use PowerShell command to access page as it ignores cookies by default:
+
+```powershell
+Invoke-WebRequest https://tomas-app1.appservice.local.azurestack.external/
+```
+
+Try multiple times and you should see about 20% of responses comming from new version.
+
+After sime time we feel confident with new version, let's swap the slots and release to production. What was test before will become production and previous production will be in test (so you can easily switch back if something goes wrong). Go to Deploment Slots and select Swap. After operation is complete you should see only new version.
+
+You application is now very popular and you need more performance to handle load. Add additional application node by going to Scale out (App Service plan) and increase number to 2. There are now additional steps required, after couple of minutes you have dobled your performance. You also scale back to 1 and because reverse proxy which is part of PaaS holds connections there should be no impact on availability. 
+
+## Step 11 - use developer tooling to integrate Azure Stack with your development environment or CI/CD pipeline
+
+Open Visual Studio 2019 and create new project. Select ASP.NET Core Web Application template and type Web Application (Model-View-Controller).
+
+Hit F5 to compile and run you app locally. If page loads, close your browser.
+
+In right top corner ther is Sign In buttot - sign as AAD user.
+
+In Solution Explorer right click on application name (right under Solution myapp) and select Publish. Use App Service and choose Creat New. You will list of all your subscriptions in both Azure and Azure Stack. Select correct one and find your existing App Service Plan. Click Create and wait for your application to be deployed. Browser will open automatically pointing to your Web App hosted in Azure Stack PaaS.
+
+There are much more integrations available for Developers and DevOps Teams:
+* You can deploy and manage additional components in Azure Stack including VMs, Storage accounts or Azure Functions
+* You can use remote debugging
+* You can deploy to Kubernetes in Azure Stack including automatic Docker container creation, publish to Azure Container Registry etc.
+* You can use .NET Framework, .NET Core, Java, Node.JS and other languages
+* Open source platform Visual Studio Code also supports similar features
+* You can integrate Azure Stack PaaS into DevOps orchestration and CI/CD tool Azure DevOps
+* There are integrations to 3rd patry tools such as Eclipse or Jenkins
+* Azure Stack supports automation with tools like Terraform or Ansible
+
+## Step 12 - enable application monitoring with Application Insights in Azure
+We will now add SDK to monitor application in Azure Application Insights. Applications in Azure Stack can be deeply monitored using Azure public cloud tools. Right click on app name in Solution Explorer, click Add and Application Insights Telemetry. Click on Configure settings to select your own resource group name and use West Europe region. Wizard will automatically find your Azure subscription and will create Application Insights and build connections to it to your application after you clic Register.
+
+Right click on app name and Publish changes to Azure Stack.
+
+After application opens generate some events by clicking on some tabs on top.
+
+Open Application Insights in Azure and try the following:
+* Open Live Stream tab and click on some tabs to see realtime data
+* Check Application Map
+* Open Search to see some events
+* Check Performance section
+* Investigate Usage section including Users, Sessions and User Flows
+
+## Step 13 - use serverless to expose API endpoint and store messages in Queue
+
+## Step 14 - use serverless to react on message in Queue and create file in Blob storage
 
 ## Step 15 - automate networking environment using basic ARM template
 Deploy ARM template with VNET, one subnet and one NSG.

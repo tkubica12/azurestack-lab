@@ -3,7 +3,9 @@
 ## Prerequisities
 - Each participant need to be able to log into both Azure Stack and Azure
 - Each participant to have his own subscription in Azure Stack as Owner using plan with all services enabled and unlimited quota
-- Install Application Services resource provider on Azure Stack in default configuration and scale number of dedicated worker nodes in Small tier to double amount of participants
+- Install Application Services resource provider on Azure Stack in default configuration and configure the following:
+  - Scale number of dedicated worker nodes in Small tier to double amount of participants
+  - Configure GitHub deployment according to [https://docs.microsoft.com/en-us/azure-stack/operator/azure-stack-app-service-configure-deployment-sources#configure-github](https://docs.microsoft.com/en-us/azure-stack/operator/azure-stack-app-service-configure-deployment-sources#configure-github)
 - For Day 2 install SQL resource provider
 - Download following items to marketplace:
   - Latest Windows 2016 Datacenter (PAYG)
