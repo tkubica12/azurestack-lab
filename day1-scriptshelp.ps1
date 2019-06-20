@@ -272,6 +272,22 @@ az vmss create -n webscaleset `
     --subnet $(az network vnet subnet show -g net-rg --name webfarm --vnet-name net --query id -o tsv) `
     --lb web-lb
 
+## Create LB rule and helth probe
+az network lb probe create -g web-rg `
+    --lb-name web-lb `
+    --name webprobe `
+    --protocol tcp `
+    --port 80
+az network lb rule create -g web-rg `
+    --lb-name web-lb `
+    --name myHTTPRule `
+    --protocol tcp `
+    --frontend-port 80 `
+    --backend-port 80 `
+    --frontend-ip-name loadBalancerFrontEnd `
+    --backend-pool-name web-lbBEPool `
+    --probe-name webprobe
+
 ## Create storage account and upload scripts
 $storageName = "myuniquename1919"
 az storage account create -n $storageName `
@@ -315,6 +331,7 @@ az vmss extension set --vmss-name webscaleset `
     --publisher Microsoft.Azure.Extensions `
     --protected-settings '{\"commandToExecute\": \"bash app-v1.sh\"}' `
     --settings v1Settings.json
+Remove-Item v1Settings.json
 
 az vmss update-instances --instance-ids '*' `
     -n webscaleset `
@@ -330,6 +347,7 @@ az vmss extension set --vmss-name webscaleset `
     --publisher Microsoft.Azure.Extensions `
     --protected-settings '{\"commandToExecute\": \"bash app-v2.sh\"}' `
     --settings v2Settings.json
+Remove-Item v2Settings.json
 
 az vmss update-instances --instance-ids '*' `
     -n webscaleset `
