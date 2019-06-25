@@ -16,10 +16,10 @@ Check [README](./README.md)
 ## Guidelines
 Follow lab using this guide. Some tasks are accomplished via GUI, some via CLI, some with ARM templates. You will get examples of syntax so you can create commands yourself.
 
-For your convenience there is complete set of commands available at [day1-scriptshelp.ps1](./day1-scriptshelp.ps1). This for your reference and ability to quickly recreate lab environment. Please ** DO NOT use it during labs **, try work yourself and use examples to come up with right solutions.
+For your convenience there is complete set of commands available at [day1-scriptshelp.ps1](./day1-scriptshelp.ps1). This for your reference and ability to quickly recreate lab environment. Please **DO NOT use it during labs**, try work yourself and use examples to come up with right solutions.
 
 ## Step 1 - RBAC
-Create Resource Group named <yourname>-shared-rg and give colleague on your left access on Reader level. Also create Resource Group <yourname>-notshared-rg with no additional RBAC configurations.
+Create Resource Group named (yourname)-shared-rg and give colleague on your left access on Reader level. Also create Resource Group (yourname)-notshared-rg with no additional RBAC configurations.
 
 Check you can see subscription of one of your colleagues and you can his Resource Group there.
 
@@ -104,17 +104,17 @@ Format-Volume -FileSystem NTFS -NewFileSystemLabel datadisk2 -Confirm:$false
 Install-WindowsFeature AD-Domain-Services -IncludeManagementTools
 Import-Module ADDSDeployment
 Install-ADDSForest `
--CreateDnsDelegation:$false `
--DatabasePath "F:\Windows\NTDS" `
--DomainMode "Win2012R2" `
--DomainName "corp.stack.com" `
--DomainNetbiosName "CORP" `
--ForestMode "Win2012R2" `
--InstallDns:$true `
--LogPath "F:\Windows\NTDS" `
--NoRebootOnCompletion:$false `
--SysvolPath "F:\Windows\SYSVOL" `
--Force:$true
+    -CreateDnsDelegation:$false `
+    -DatabasePath "F:\Windows\NTDS" `
+    -DomainMode "Win2012R2" `
+    -DomainName "corp.stack.com" `
+    -DomainNetbiosName "CORP" `
+    -ForestMode "Win2012R2" `
+    -InstallDns:$true `
+    -LogPath "F:\Windows\NTDS" `
+    -NoRebootOnCompletion:$false `
+    -SysvolPath "F:\Windows\SYSVOL" `
+    -Force:$true
 
 ### After VM is rebooted setup DNS forwarder to 168.63.129.16
 Set-DnsServerForwarder -IPAddress "168.63.129.16" -PassThru
@@ -244,7 +244,7 @@ In Azure Stack add Azure Monitor extension and Dependency extension to all your 
 It will take some time for solution to gather details about our environment, so we will come later to check results.
 
 ## Step 10 - create and scale WebApp using PaaS and use Deployment Slots to manage versions
-Usign GUI create Web App named <yourname>-app1 on new Service Plan on Production tier S1. Open Web App page and click on URL - you should see dafult page of your future application.
+Usign GUI create Web App named (yourname)-app1 on new Service Plan on Production tier S1. Open Web App page and click on URL - you should see dafult page of your future application.
 
 Go to App Service Editor (Preview) and in WWWROOT folder use right click to create file index.html with "My great app" inthere. Refresh URL of your application - you should see you static web up and running.
 
@@ -303,7 +303,7 @@ Open Application Insights in Azure and try the following:
 ## Step 13 - use serverless to expose API endpoint and store messages in Queue
 We will create new Function App (serverless) via GUI. We can use Consumption hosting plan (running in shared plan), but as we already purchased App Service plan dedicated, let's run it there. Use .NET as language and let wizard create storage account.
 
-When environment is ready open it and click on + sign in Functions. Use wizard to select Webhook + API. There is sample code (you do not have to understand it at this point) that takes name as argument and responds with Hello <name>. Use Get function URL and copy it to clipboard. Open web browser and paste it in and add "&name=Tomas". Full URL might look something like this:
+When environment is ready open it and click on + sign in Functions. Use wizard to select Webhook + API. There is sample code (you do not have to understand it at this point) that takes name as argument and responds with Hello (name). Use Get function URL and copy it to clipboard. Open web browser and paste it in and add "&name=Tomas". Full URL might look something like this:
 
 ```
 https://mojefunkce.appservice.local.azurestack.external/api/HttpTriggerCSharp1?code=aoBmARujcdaoUgaLIApy8KQOs1QzskpuDmIoKB7BtjV0KP5x/SM5Pg==&name=Tomas
@@ -374,7 +374,7 @@ Think about interesting scenarios with Azure Functions:
 Deploy ARM template with VNET, one subnet and one NSG.
 
 ```powershell
-$region = "local" # $region = "westeurope"
+$region = "local"
 az group create -n arm-net-rg -l $region
 az group deployment create -g arm-net-rg `
     --template-file networking.json
@@ -383,7 +383,7 @@ az group deployment create -g arm-net-rg `
 Modify template to add the following:
 - "app" subnet with range 10.1.1.0/24
 - "web" subnet with range 10.1.2.0/24
-- "app-nsq" to allow RDP access only from jump **subnet**
+- "app-nsq" to allow RDP access only from jump subnet
 - "web-nsg" to allow RDP access only from jump subnet and HTTP from anywhere
 
 Do this step by step and always ensure template is deployable. Since template is desired state you can apply it over and over.
@@ -456,7 +456,7 @@ az group deployment create -g arm-app-rg `
     --parameters count=3
 ```
 
-Investigate what happens if we now redeploy with low count.
+Investigate what happens if we now redeploy with lower count.
 
 ```powershell
 az group deployment create -g arm-app-rg `
@@ -648,7 +648,7 @@ az group delete -n arm2-jump-rg -y --no-wait
 az group delete -n arm2-app-rg -y --no-wait
 az group delete -n arm2-web-rg -y --no-wait
 
-## Wait for all previous resource groups to be deleted and then destroy net-rg
+## Wait for all previous resource groups to be deleted and then destroy networking
 az group delete -n net-rg -y --no-wait
 az group delete -n arm-net-rg -y --no-wait
 az group delete -n arm2-net-rg -y --no-wait
