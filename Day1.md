@@ -86,6 +86,7 @@ az network vnet subnet update -g net-rg `
 
 This how you can create VM:
 ```powershell
+$subnetId = $(az network vnet subnet show -g net-rg --name domaincontroller --vnet-name net --query id -o tsv)
 az vm create -n ad-dc-vm `
     -g ad-dc-rg `
     --image "MicrosoftWindowsServer:WindowsServer:2016-Datacenter:latest" `
