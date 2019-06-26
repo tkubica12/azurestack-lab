@@ -69,7 +69,7 @@ Example for creating NSG and assigning to subnet (only Allow is listed, complete
 az network nsg create -n domaincontroller-nsg -g net-rg
 az network nsg rule create -g net-rg `
     --nsg-name domaincontroller-nsg `
-    -n DenyRDP `
+    -n AllowRDP `
     --priority 100 `
     --source-address-prefixes 10.0.0.0/24 `
     --source-port-ranges '*' `

@@ -50,7 +50,7 @@ $subnetId = $(az network vnet subnet show -g net-rg --name domaincontroller --vn
 az network nsg create -n domaincontroller-nsg -g net-rg
 az network nsg rule create -g net-rg `
     --nsg-name domaincontroller-nsg `
-    -n DenyRDP `
+    -n AllowRDPFromJump `
     --priority 100 `
     --source-address-prefixes 10.0.0.0/24 `
     --source-port-ranges '*' `
@@ -61,7 +61,7 @@ az network nsg rule create -g net-rg `
     --description "Allow RDP from jump subnet"
 az network nsg rule create -g net-rg `
     --nsg-name domaincontroller-nsg `
-    -n AllowRDPFromJump `
+    -n DenyRDP `
     --priority 110 `
     --source-address-prefixes '*' `
     --source-port-ranges '*' `
