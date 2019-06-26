@@ -23,9 +23,10 @@
 - Each participant to have access to Azure shared subscription in one Resource Group (participantname-rg) on Contributor level
 - Unrestricted Internet access for each participant
 - Install tools on participant notebook:
-  - Azure CLI
-  - Visual Studio Code
-  - Storage Explorer
+  - Azure CLI [download](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli?view=azure-cli-latest)
+  - Visual Studio Code [download](https://code.visualstudio.com/download)
+  - Visual Studio Community 2019 [download](https://visualstudio.microsoft.com/thank-you-downloading-visual-studio/?sku=Community&rel=16)
+  - Storage Explorer [download](https://azure.microsoft.com/cs-cz/features/storage-explorer/)
 - Additional requirements for Day 2:
   - Administrator access to Azure Stack to configure SQL provider and create custom marketplace items
   - Service Principal account in AAD for each participant
