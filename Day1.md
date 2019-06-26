@@ -77,7 +77,7 @@ This how you can create VM:
 ```powershell
 az vm create -n ad-dc-vm `
     -g ad-dc-rg `
-    --image Win2016Datacenter `
+    --image "MicrosoftWindowsServer:WindowsServer:2016-Datacenter:latest" `
     --size Standard_DS1_v2 `
     --admin-username labuser `
     --admin-password Azure12345678 `

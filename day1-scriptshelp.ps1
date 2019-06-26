@@ -33,7 +33,7 @@ az group create -n jump-rg -l $region
 $subnetId = $(az network vnet subnet show -g net-rg --name jump --vnet-name net --query id -o tsv)
 az vm create -n jump-vm `
     -g jump-rg `
-    --image Win2016Datacenter `
+    --image "MicrosoftWindowsServer:WindowsServer:2016-Datacenter:latest" `
     --size Standard_DS1_v2 `
     --admin-username labuser `
     --admin-password Azure12345678 `
@@ -74,7 +74,7 @@ az network vnet subnet update -g net-rg `
     --network-security-group domaincontroller-nsg
 az vm create -n ad-dc-vm `
     -g ad-dc-rg `
-    --image Win2016Datacenter `
+    --image "MicrosoftWindowsServer:WindowsServer:2016-Datacenter:latest" `
     --size Standard_DS1_v2 `
     --admin-username labuser `
     --admin-password Azure12345678 `
@@ -153,7 +153,7 @@ az group create -n images-rg -l $region
 $subnetId = $(az network vnet subnet show -g net-rg --name backend --vnet-name net --query id -o tsv)
 az vm create -n appimage-vm `
     -g imageprepare-rg `
-    --image Win2016Datacenter `
+    --image "MicrosoftWindowsServer:WindowsServer:2016-Datacenter:latest" `
     --size Standard_DS1_v2 `
     --admin-username labuser `
     --admin-password Azure12345678 `
@@ -262,7 +262,7 @@ az group create -n web-rg -l $region
 
 az vmss create -n webscaleset `
     -g web-rg `
-    --image UbuntuLTS `
+    --image "Canonical:UbuntuServer:1.04-LTS:latest" `
     --instance-count 2 `
     --vm-sku Standard_DS1_v2 `
     --admin-username labuser `
