@@ -98,17 +98,17 @@ Format-Volume -FileSystem NTFS -NewFileSystemLabel datadisk2 -Confirm:$false
 Install-WindowsFeature AD-Domain-Services -IncludeManagementTools
 Import-Module ADDSDeployment
 Install-ADDSForest `
--CreateDnsDelegation:$false `
--DatabasePath "F:\Windows\NTDS" `
--DomainMode "Win2012R2" `
--DomainName "corp.stack.com" `
--DomainNetbiosName "CORP" `
--ForestMode "Win2012R2" `
--InstallDns:$true `
--LogPath "F:\Windows\NTDS" `
--NoRebootOnCompletion:$false `
--SysvolPath "F:\Windows\SYSVOL" `
--Force:$true
+    -CreateDnsDelegation:$false `
+    -DatabasePath "F:\Windows\NTDS" `
+    -DomainMode "Win2012R2" `
+    -DomainName "corp.stack.com" `
+    -DomainNetbiosName "CORP" `
+    -ForestMode "Win2012R2" `
+    -InstallDns:$true `
+    -LogPath "F:\Windows\NTDS" `
+    -NoRebootOnCompletion:$false `
+    -SysvolPath "F:\Windows\SYSVOL" `
+    -Force:$true
 
 ### After VM is rebooted setup DNS forwarder to 168.63.129.16
 Set-DnsServerForwarder -IPAddress "168.63.129.16" -PassThru
@@ -228,10 +228,10 @@ az network nsg rule create -g net-rg `
     --source-address-prefixes 10.0.0.0/24 `
     --source-port-ranges '*' `
     --destination-address-prefixes '*' `
-    --destination-port-ranges 3389 `
+    --destination-port-ranges 22 `
     --access Allow `
     --protocol Tcp `
-    --description "Allow RDP from jump subnet"
+    --description "Allow SSH from jump subnet"
 az network nsg rule create -g net-rg `
     --nsg-name web-nsg `
     -n AllowRDPFromJump `
@@ -239,10 +239,10 @@ az network nsg rule create -g net-rg `
     --source-address-prefixes '*' `
     --source-port-ranges '*' `
     --destination-address-prefixes '*' `
-    --destination-port-ranges 3389 `
+    --destination-port-ranges 22 `
     --access Deny `
     --protocol Tcp `
-    --description "Deny RDP traffic"
+    --description "Deny SSH traffic"
 az network nsg rule create -g net-rg `
     --nsg-name web-nsg `
     -n AllowHttp `
@@ -253,7 +253,7 @@ az network nsg rule create -g net-rg `
     --destination-port-ranges 80 `
     --access Allow `
     --protocol Tcp `
-    --description "Allow HTTP from jump subnet"
+    --description "Allow HTTP"
 az network vnet subnet update -g net-rg `
     -n webfarm `
     --vnet-name net `
@@ -264,7 +264,7 @@ az group create -n web-rg -l $region
 
 az vmss create -n webscaleset `
     -g web-rg `
-    --image "Canonical:UbuntuServer:1.04-LTS:latest" `
+    --image "Canonical:UbuntuServer:14.04-LTS:latest" `
     --instance-count 2 `
     --vm-sku Standard_DS1_v2 `
     --admin-username labuser `
