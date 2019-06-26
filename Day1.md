@@ -204,7 +204,9 @@ Create Storage Account (make sure name is globally unique), create Blob containe
 
 ```powershell
 $storageName = "myuniquename1919"
-az storage account create -n $storageName -g web-rg
+az storage account create -n $storageName `
+    -g web-rg `
+    --sku Standard_LRS
 az storage container create -n deploy `
     --connection-string $(az storage account show-connection-string -n $storageName -g web-rg -o tsv)
 
