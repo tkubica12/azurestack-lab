@@ -49,7 +49,7 @@ az login
 az network vnet subnet create -n domaincontroller `
     -g net-rg `
     --vnet-name net `
-    --address-prefixes 10.0.1.0/24
+    --address-prefix 10.0.1.0/24
 ```
 
 ## Step 3 - jump VM
