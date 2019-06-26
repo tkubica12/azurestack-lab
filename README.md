@@ -16,7 +16,7 @@
   - Latest Kubernetes
   - Azure Monitor, Update and Configuration Management extension for Windows and Linux
   - Azure Monitor Dependency Agent extension for Windows and Linux
-  - For Day 2 download SQL images (SQL Standard 2017 on Windows)
+  - For Day 3 download SQL images (SQL Standard 2017 on Windows)
   - For Day 3 deploy additional components:
     - CheckPoint and Fortigate
     - F5
@@ -28,15 +28,15 @@
   - Visual Studio Community 2019 [download](https://visualstudio.microsoft.com/thank-you-downloading-visual-studio/?sku=Community&rel=16)
   - Storage Explorer [download](https://azure.microsoft.com/cs-cz/features/storage-explorer/)
 - Additional requirements for Day 2:
-  - Administrator access to Azure Stack to configure SQL provider and create custom marketplace items
   - Service Principal account in AAD for each participant
 - Additional requirements for Day 3:
   - Get trial licenses from vendors of your choice (Check Point comes with 15 trial built in, F5 does not - check how it is with Fortinet)
+  - Administrator access to Azure Stack to configure SQL provider and create custom marketplace items
 - Make yourself familiar with [operator documentation](https://docs.microsoft.com/en-us/azure-stack/operator/) and [user documentation](https://docs.microsoft.com/en-us/azure-stack/user/)
 - Read [blog in Czech](https://www.tomaskubica.cz/tag/azurestack/)
 
 ## Labs
 We will split content into three training days:
-- [Day 1](./Day1.md)
-- [Day 2](./Day2.md)
+- [Day 1: Infrastructure services](./Day1.md)
+- [Day 2: Application platforms](./Day2.md)
 - [Day 3](./Day3.md)

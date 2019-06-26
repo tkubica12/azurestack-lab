@@ -223,7 +223,7 @@ az vm extension set -n JsonADDomainExtension `
 az network nsg create -n web-nsg -g net-rg
 az network nsg rule create -g net-rg `
     --nsg-name web-nsg `
-    -n DenyRDP `
+    -n AllowSSHFromJump `
     --priority 100 `
     --source-address-prefixes 10.0.0.0/24 `
     --source-port-ranges '*' `
@@ -234,7 +234,7 @@ az network nsg rule create -g net-rg `
     --description "Allow SSH from jump subnet"
 az network nsg rule create -g net-rg `
     --nsg-name web-nsg `
-    -n AllowRDPFromJump `
+    -n DenySSH `
     --priority 110 `
     --source-address-prefixes '*' `
     --source-port-ranges '*' `
@@ -274,7 +274,7 @@ az vmss create -n webscaleset `
     --subnet $(az network vnet subnet show -g net-rg --name webfarm --vnet-name net --query id -o tsv) `
     --lb web-lb
 
-## Create LB rule and helth probe
+## Create LB rule and health probe
 az network lb probe create -g web-rg `
     --lb-name web-lb `
     --name webprobe `
@@ -355,7 +355,7 @@ az vmss update-instances --instance-ids '*' `
     -n webscaleset `
     -g web-rg
 
-# Step 21 - cleanup
+# Step 16 - cleanup
 az group delete -n ad-dc-rg -y --no-wait
 az group delete -n images-rg -y --no-wait
 az group delete -n jump-rg -y --no-wait
