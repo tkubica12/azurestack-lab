@@ -35,6 +35,17 @@ Use CLI to create additional subnets:
 
 Example:
 ```powershell
+# First connect you laptop CLI to Azure stack
+$domain = "local.azurestack.external"
+az cloud register -n AzureStack `
+    --endpoint-resource-manager "https://management.$domain" `
+    --suffix-storage-endpoint $domain `
+    --suffix-keyvault-dns ".vault.$domain" `
+    --profile "2019-03-01-hybrid"
+az cloud set -n AzureStack
+az login
+
+# Create subnet
 az network vnet subnet create -n domaincontroller `
     -g net-rg `
     --vnet-name net `

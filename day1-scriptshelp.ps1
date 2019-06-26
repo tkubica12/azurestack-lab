@@ -1,14 +1,16 @@
 # Connect
-az cloud register -n AzureStackUser `
-    --endpoint-resource-manager "https://management.local.azurestack.external" `
-    --suffix-storage-endpoint "local.azurestack.external" `
-    --suffix-keyvault-dns ".vault.local.azurestack.external"
-az cloud set -n AzureStackUser
-az cloud update --profile 2019-03-01-hybrid
+# First connect you laptop CLI to Azure stack
+$domain = "local.azurestack.external"
+az cloud register -n AzureStack `
+    --endpoint-resource-manager "https://management.$domain" `
+    --suffix-storage-endpoint $domain `
+    --suffix-keyvault-dns ".vault.$domain" `
+    --profile "2019-03-01-hybrid"
+az cloud set -n AzureStack
 az login
 
 # Step 2
-$region = "local"   # $region = "westeurope" 
+$region = "local" 
 az group create -n net-rg -l $region
 az network vnet create -n net -g net-rg --address-prefix 10.0.0.0/16
 az network vnet subnet create -n jump `
