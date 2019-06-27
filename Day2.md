@@ -145,3 +145,4 @@ Think about interesting scenarios with Azure Functions:
 
 ## Step 9 - Use Deployment and Service to deploy and scale application
 
+## Step 10 - Using MS SQL in Linux-based Docker container in Kubernetes with Volume and StatefulSets
