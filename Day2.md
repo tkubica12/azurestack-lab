@@ -21,7 +21,7 @@ Click on new slot and go to App Service Editor (Preview) and create index.html w
 
 In Overview section find URL of your test version and open it. You next-version application is running fine.
 
-Go back to deployment slots and configure 20% of users to hit test version and click Save. Now 20% of users will go to new version. In order for single user to not switch randomly platform uses cookie-based session persistence and browser is holding it. In order to test probability of hitting new version use PowerShell command to access page as it ignores cookies by default:
+Go back to deployment slots and configure 20% of users to hit test version and click Save. Now 20% of users will go to new version. In order for single user to not switch randomly platform 2q cookie-based session persistence and browser is holding it. In order to test probability of hitting new version use PowerShell command to access page as it ignores cookies by default:
 
 ```powershell
 Invoke-WebRequest https://tomas-app1.appservice.local.azurestack.external/
@@ -145,3 +145,4 @@ Think about interesting scenarios with Azure Functions:
 
 ## Step 9 - Use Deployment and Service to deploy and scale application
 
+## Step 10 - Using MS SQL in Linux-based Docker container in Kubernetes with Volume and StatefulSets
