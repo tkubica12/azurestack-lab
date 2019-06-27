@@ -39,4 +39,4 @@
 We will split content into three training days:
 - [Day 1: Infrastructure services](./Day1.md)
 - [Day 2: Application platforms](./Day2.md)
-- [Day 3](./Day3.md)
+- [Day 3: Data and networking services](./Day3.md)
