@@ -1,0 +1,25 @@
+kind: Pod
+apiVersion: v1
+metadata:
+  name: todo
+spec:
+  containers:
+    - name: todo
+      image: tkubica/dotnetcoresqldb:1
+      ports:
+        - 80
+      livenessProbe:
+        httpGet:
+          path: /
+          port: 80
+      readynessProbe:
+        httpGet:
+          path: /
+          port: 80
+      resources:
+        requests:
+          cpu: 100m
+          memory: 128M
+        limits:
+          cpu: 500m
+          memory: 512M
