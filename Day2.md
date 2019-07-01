@@ -200,6 +200,7 @@ Scale our deployment to 3 replicas.
 ```powershell
 kubectl apply -f deploymentApp3replicas.yaml
 kubectl get deploy,rs,pods
+kubectl get pods -o wide
 ```
 
 Now let's play a little bit with labels. There are few ways how you can print it on output or filter by label. Try it out.
@@ -212,10 +213,10 @@ kubectl get pods --show-labels
 kubectl get pods -l app=todo
 
 # add label column
-kubectl get pods -L app,component
+kubectl get pods -L app
 ```
 
-Note that the way how ReplicaSet (created by Deployment) is checking whether environment comply with desired state is by looking at labels. Look for Selector in output.
+Note kthat the way how ReplicaSet (created by Deployment) is checking whether environment comply with desired state is by looking at labels. Look for Selector in output.
 
 ```powershell
 kubectl get rs
@@ -254,7 +255,6 @@ While we wait we will test service internally. Create Pod with Ubuntu, connect t
 
 ```powershell
 kubectl apply -f podUbuntu.yaml
-kubectl get service
 ```
 
 For troubleshooting you can exec into container and run some commands there or even jump using interactive mode to shell. Note this is just for troubleshooting - you should never change anything inside running containers this way. Always build new container image or modify external configuration (we will come to this later) rather than doing things inside.
@@ -263,14 +263,14 @@ Jump into container and try access to service using DNS record.
 
 ```powershell
 kubectl exec -ti ubuntu -- /bin/bash
-curl todo/api/version
+curl todo-app/api/version
 ```
 
 Azure Stack has by now allocated public IP to deployed Service. You can get it via kubectl get services. When using scripts we can use jsonpath for direct parsing.
 
 ```powershell
-$extPublicIP = $(kubectl get service todo -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
-Invoke-WebRequest $extPublicIP/api/version
+$extPublicIP = $(kubectl get service todo-app -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+Invoke-RestMethod $extPublicIP/api/version -DisableKeepAlive
 ```
 
 ## Step 10 - rolling upgrade
@@ -279,8 +279,8 @@ Kubernetes Deployment support rolling upgrade to newer container images. If you 
 In one window start curl in loop.
 
 ```powershell
-$url = "$(kubectl get service todo -o jsonpath='{.status.loadBalancer.ingress[0].ip}')/api/version"
-while($true) {(Invoke-WebRequest $url).Content}
+$url = "$(kubectl get service todo-app -o jsonpath='{.status.loadBalancer.ingress[0].ip}')/api/version"
+while($true) {Invoke-RestMethod $url -DisableKeepAlive}
 ```
 
 Focus on version which is on end of string. No in different window deploy new version of Deploment with different image tag and see what is going on.

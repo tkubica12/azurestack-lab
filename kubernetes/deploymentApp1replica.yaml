@@ -18,14 +18,19 @@ spec:
         - name: todo
           image: tkubica/dotnetcoresqldb:1
           ports:
-            - 80
+            - containerPort: 80
+          env:
+            - name: ASPNETCORE_ENVIRONMENT
+              value: Development
+            - name: ASPNETCORE_URLS
+              value: "http://0.0.0.0:80"
           livenessProbe:
             httpGet:
-              path: /
+              path: /api/version
               port: 80
-          readynessProbe:
+          readinessProbe:
             httpGet:
-              path: /
+              path: /api/version
               port: 80
           resources:
             requests:
