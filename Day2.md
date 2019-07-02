@@ -325,7 +325,7 @@ kubectl delete pod sql-78b549bdf7-wcbg6   # Use your sql pod name
 
 Todo application will return error for some time, but Pod will be recreated and todo will start to work again. Note this is not full HA solution:
 * If Pod fails, but Node is still available, recovery is pretty fast (Kubernetes create new SQL Pod and point to the same Volume)
-* Should Node fail Kubernetes will run Pod on different Node, but it can take about 5 minutes for VOlume to attached to new Node so this is not proper HA solution
+* Should Node fail Kubernetes will run Pod on different Node, but it can take about 5 minutes for Volume to get attached to new Node so this is not proper HA solution as downtime can be in minutes
 * Should database file get corrupted we might experience some data loss. Note Disk is highly available (all data are replicated 3 times), but does not prevent corruption on file system and database level
 
 For production scenarios use SQL in AlwaysOn replicated cluster configuration using Kubernetes Operator. Note that as Kubernetes user you are responsible for HA, patching and licensing of your SQL. If Azure Stack provider operates managed SQL as a Service that might be easier for you to use as operator manages and upgrades SQL for you.
