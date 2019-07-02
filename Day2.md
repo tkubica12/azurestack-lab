@@ -289,7 +289,46 @@ Focus on version which is on end of string. No in different window deploy new ve
 kubectl apply -f deploymentAppV2.yaml
 ```
 
-## Step 11 - Using MS SQL in Linux-based Docker container in Kubernetes with Volume, Secret and StatefulSet
+## Step 11 - Using MS SQL in Linux-based Docker container in Kubernetes
+First we will need to securely store database sa account password and connection string. We will use Kubernetes Secret for that.
+
+```powershell
+kubectl create secret generic db `
+    --from-literal=password=Azure12345678 `
+    --from-literal=connectionString="Server=tcp:sql,1433;Initial Catalog=todo;Persist Security Info=False;User ID=sa;Password=Azure12345678;MultipleActiveResultSets=False;Encrypt=False;TrustServerCertificate=False;Connection Timeout=30;"
+```
+
+Until this point we have not connected our todo app with SQL database. We have monitored health of /api/version, but now we want to check app is working and connected to DB (we will poll / as health probe as app returns 503 if DB is not connected). Also we need to pass DB connection string as environmental variable from stored Secret.
+
+```powershell
+kubectl apply -f deploymentAppFull.yaml
+```
+
+Note rolling upgrade is halted. Why? We do not have DB ready yet so liveness probe if failing and Kubernetes keeps restarting our application. Because Pod is not healthy, rolling upgrade does not continue. This is fine - we will deploy SQL, Pod will eventualy get access to it, probe will succeed and Deployment will advance with other Pods.
+
+For purpose of this training we will deploy non-HA SQL (good for testing). For running AlwaysOn SQL clusters on Kubernetes you may use Kubernetes SQL Operator: [https://docs.microsoft.com/en-us/sql/linux/sql-server-ag-kubernetes?view=sqlallproducts-allversions](https://docs.microsoft.com/en-us/sql/linux/sql-server-ag-kubernetes?view=sqlallproducts-allversions)
+
+sql.yaml consists of Persistent Volume Claim backed by Azure Disk, Deployment with single instance SQL and Service to provide DNS discovery and virtual endpoint.
+
+```powershell
+kubectl apply -f sql.yaml
+kubectl get pvc,pod
+```
+
+Access your todo application - it should work now. Add some todo and it will be written to SQL.
+
+We can now attempt to kill sql pod.
+
+```powershell
+kubectl delete pod sql-78b549bdf7-wcbg6   # Use your sql pod name
+```
+
+Todo application will return error for some time, but Pod will be recreated and todo will start to work again. Note this is not full HA solution:
+* If Pod fails, but Node is still available, recovery is pretty fast (Kubernetes create new SQL Pod and point to the same Volume)
+* Should Node fail Kubernetes will run Pod on different Node, but it can take about 5 minutes for VOlume to attached to new Node so this is not proper HA solution
+* Should database file get corrupted we might experience some data loss. Note Disk is highly available (all data are replicated 3 times), but does not prevent corruption on file system and database level
+
+For production scenarios use SQL in AlwaysOn replicated cluster configuration using Kubernetes Operator. Note that as Kubernetes user you are responsible for HA, patching and licensing of your SQL. If Azure Stack provider operates managed SQL as a Service that might be easier for you to use as operator manages and upgrades SQL for you.
 
 ## Step 12 - Use Azure Container Registry to store and build images
 
