@@ -330,5 +330,7 @@ Todo application will return error for some time, but Pod will be recreated and 
 
 For production scenarios use SQL in AlwaysOn replicated cluster configuration using Kubernetes Operator. Note that as Kubernetes user you are responsible for HA, patching and licensing of your SQL. If Azure Stack provider operates managed SQL as a Service that might be easier for you to use as operator manages and upgrades SQL for you.
 
-## Step 12 - Use Azure Container Registry to store and build images
+## Step 12 - deploy Azure cognitive services in Kubernetes in Azure Stack
+
+## Step 13 - Use Azure Container Registry to store and build images
 
