@@ -138,7 +138,31 @@ Think about interesting scenarios with Azure Functions:
 * Think about hybrid scenarios - for example you can collect messages in Azure Stack and trigger function to filter interesting events and send them to Azure Blob Storage for advanced processing in public cloud. Or you can user public cloud Azure to build IoT platform and use Functions in public cloud to process RAW data, but send converted data to Azure Stack Queue, where you trigger Azure Stack Functions to process it and store in local database in Azure Stack.
 
 ## Step 6 - create Kubernetes cluster and connect
-TBD
+Kubernetes needs access to your Azure environment in order to install cluster and enable Kubernetes to create resources for your applications such as laod balancer rules or disks. Therefore we need to have Service Principal account in Active Directory. 
+
+You should have account ready for this lab. If not create new one and note your application id. [https://docs.microsoft.com/en-us/azure/active-directory/develop/howto-create-service-principal-portal#create-an-azure-active-directory-application](https://docs.microsoft.com/en-us/azure/active-directory/develop/howto-create-service-principal-portal#create-an-azure-active-directory-application)
+
+We need secret for this account - generate it. [https://docs.microsoft.com/en-us/azure/active-directory/develop/howto-create-service-principal-portal#create-a-new-application-secret](https://docs.microsoft.com/en-us/azure/active-directory/develop/howto-create-service-principal-portal#create-a-new-application-secret)
+
+Give this account RBAC authorization for your subscription (Resource Group would be enough, but let's keep it simple). Go to subscriptions, Access Control (IAM) and add your Service Principal account as Contributor.
+
+Next we need to generate SSH keys. You can use [https://www.puttygen.com/](https://www.puttygen.com/). Make sure you store your private key and public key.
+
+Go to Azure Stack portal and run Kubernetes wizard. We will create non-HA cluster with one master node and for worker nodes use 2 nodes. Enter your service principal (application id), secret and also paste your public SSH key.
+
+When cluster is created we will need to grap connection details from master node and copy it to your notebook so we can connect to Kubernetes from it. Use [WinSCP](https://winscp.net/eng/download.php) and point it public IP of your master node and specify default username which is azureuser. Connect.
+
+In panel with /home/azureuser folder press CTRL+ALT+h to see hidden files. There is .kube directory with config file. Copy full .kube folder to your C:\Users\yourusername. You should have C:\Users\yourusername\.kube\config file on your PC.
+
+To work with Kubernetes cluster we will use kubectl.exe. [Download](https://storage.googleapis.com/kubernetes-release/release/v1.15.0/bin/windows/amd64/kubectl.exe) it to some folder which is in our PATH.
+
+Make sure you can connect to cluster:
+
+```powershell
+kubectl get nodes
+```
+
+In your Visual Studio COde install Kubernetes extension. New icon should appear and you should be able to see your cluster there.
 
 ## Step 7 - create your first Pod
 Kubernetes files are stored in kubernetes folder.
