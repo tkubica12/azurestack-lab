@@ -4,9 +4,11 @@
 - Each participant need to be able to log into both Azure Stack and Azure
 - Each participant to have his own subscription in Azure Stack as Owner using plan with all services enabled and unlimited quota
 - Install Application Services resource provider on Azure Stack in default configuration and configure the following:
+  - [Preparation](https://docs.microsoft.com/en-us/azure-stack/operator/azure-stack-app-service-before-you-get-started)
+  - [Install](https://docs.microsoft.com/en-us/azure-stack/operator/app-service-deploy-ha)
   - Scale number of dedicated worker nodes in Small tier to double amount of participants
   - Configure GitHub deployment according to [https://docs.microsoft.com/en-us/azure-stack/operator/azure-stack-app-service-configure-deployment-sources#configure-github](https://docs.microsoft.com/en-us/azure-stack/operator/azure-stack-app-service-configure-deployment-sources#configure-github)
-- For Day 2 install SQL resource provider
+- For Day 3 install SQL resource provider
 - Download following items to marketplace:
   - Latest Windows 2016 Datacenter (PAYG)
   - Latest Ubuntu 16.04
@@ -27,8 +29,13 @@
   - Visual Studio Code [download](https://code.visualstudio.com/download)
   - Visual Studio Community 2019 [download](https://visualstudio.microsoft.com/thank-you-downloading-visual-studio/?sku=Community&rel=16)
   - Storage Explorer [download](https://azure.microsoft.com/cs-cz/features/storage-explorer/)
+  - WinSCP [download](https://winscp.net/eng/download.php)
+  - PuttyGen [download](https://www.puttygen.com/)
+  - Kubectl.exe [Download](https://storage.googleapis.com/kubernetes-release/release/v1.15.0/bin/windows/amd64/kubectl.exe) and place it to folder that is in your PATH
 - Additional requirements for Day 2:
-  - Service Principal account in AAD for each participant
+  - Service Principal account in AAD for each participant or one shared
+    - [Guide to create account](https://docs.microsoft.com/en-us/azure/active-directory/develop/howto-create-service-principal-portal#create-an-azure-active-directory-application)
+    - [Guide to generate secret for account](https://docs.microsoft.com/en-us/azure/active-directory/develop/howto-create-service-principal-portal#create-a-new-application-secret)
 - Additional requirements for Day 3:
   - Get trial licenses from vendors of your choice (Check Point comes with 15 trial built in, F5 does not - check how it is with Fortinet)
   - Administrator access to Azure Stack to configure SQL provider and create custom marketplace items
