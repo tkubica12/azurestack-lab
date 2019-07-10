@@ -43,7 +43,8 @@
 - Read [blog in Czech](https://www.tomaskubica.cz/tag/azurestack/)
 
 ## Labs
-We will split content into three training days:
-- [Day 1: Infrastructure services](./Day1.md)
-- [Day 2: Application platforms](./Day2.md)
-- [Day 3: Data and networking services](./Day3.md)
+We will split content into four training days:
+- [Day 1: Infrastructure services](./InfrastructureServices.md)
+- [Day 2: Application platforms](./ApplicationPlatforms.md)
+- [Day 3: Data and networking services](./DataAndNetworking.md)
+- [Day 4: Azure Stack operator training](./Operator.md)
