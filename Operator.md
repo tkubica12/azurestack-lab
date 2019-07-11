@@ -227,11 +227,21 @@ Your customer has validated Azure Stack in trial and now wants to keep his subsc
 
 Go to tenant portal and check you can create additional public IPs now.
 
+You customer now needs additional subscription for its second project. Is OK to have just very basic quota there. It can have the same owner or different one. Owners can invite members to any number of subscriptions they own.
+
+```powershell
+$owner = "username@domain.onmicrosoft.com"
+New-AzsUserSubscription -Owner $owner `
+    -OfferId $((Get-AzsManagedOffer -Name "trial-2core-512GBdisk-128GBstore-1ip" -ResourceGroupName portfolio).Id) `
+    -DisplayName "customer1-projectB"
+```
+
 Cleanup. **We are doing this in lab. In real world make sure you do not delete your customers subscriptions! Good way to prevent this is to use Locks on key resources, try that.**
 
 ```powershell
 # Delete subscription (careful! We are doing this in our lab only, you do not want to destroy customers environment!)
 Get-AzsUserSubscription | where {$_.DisplayName -eq "customer1-projectA"} | Remove-AzsUserSubscription -Force
+Get-AzsUserSubscription | where {$_.DisplayName -eq "customer1-projectB"} | Remove-AzsUserSubscription -Force
 
 # When subscriptions in offer are deleted, you can delete offer
 Remove-AzsOffer -Name "trial-2core-512GBdisk-128GBstore-1ip" -ResourceGroupName portfolio -Force
