@@ -284,3 +284,27 @@ Remove-AzsNetworkQuota -Name "q-net-50ip" -Force
 If there is need to get access to deeper logs (typically during troubleshooting support case with Microsoft) you can access [privileged endpoint](https://docs.microsoft.com/en-us/azure-stack/operator/azure-stack-privileged-endpoint) and get [deep logs](https://docs.microsoft.com/cs-cz/azure-stack/operator/azure-stack-diagnostics)
 
 
+## Step XX - billing
+Azure Stack provides usage information API. One is Tenant API that is designed for tenants to gather usage details themselves. We will use Provider API to gather usage of all tenants for billing purposes.
+
+First let's get data and store in JSON file. Select start and end time. In this example we will use Daily granularity, but if required, you can go down to Hourly granularity.
+
+```powershell
+# Define start and end date
+$start = "03-01-2019"
+$end = "07-11-2019"
+
+# Load usage data to memory
+$usageData = Get-AzsSubscriberUsage -ReportedStartTime $start -ReportedEndTime $end -AggregationGranularity Daily
+
+# Store data in JSON file
+$usageData | convertto-json | out-file AzureStackUsage.json
+```
+
+We can analyze this file with Power BI. Power Query to load and transform data is in powerbi/dataparsing.query and simple filtered report is in powerbi/report.pbix.
+
+![](powerbi/screen.png)
+
+Our example is extremly simple, but Power BI is very powerful and a lot can be achieved there. If you want to go with that please concact Azure data experts. Also subscriptions are represented by ID and meters also which is not very convenient. You may build meter-to-name table and also export subscription-to-name table via API and use join queries in Power BI to get better experience.
+
+Also note that there are 3rd party billing solutions available that might give you exactly what you need without too much effort. Some are even integrated into Azure Stack Administration portal and even to Tenant portal, so you customers can easily access usage data in built-in portal. Good example of such solution is [Cloud Assert](https://www.cloudassert.com/Solutions/Azure-Stack/Usage-and-Billing)

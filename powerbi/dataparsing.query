@@ -1,0 +1,20 @@
+let
+    Source = Json.Document(File.Contents("C:\Users\tokubica\AzureStackUsage.json")),
+    #"Converted to Table" = Table.FromList(Source, Splitter.SplitByNothing(), null, null, ExtraValues.Error),
+    #"Expanded Column1" = Table.ExpandRecordColumn(#"Converted to Table", "Column1", {"SubscriptionId", "UsageStartTime", "UsageEndTime", "InstanceData", "Quantity", "MeterId", "Id", "Name", "Type", "Location", "Tags"}, {"SubscriptionId", "UsageStartTime", "UsageEndTime", "InstanceData", "Quantity", "MeterId", "Id", "Name", "Type", "Location", "Tags"}),
+    #"Extracted Text Between Delimiters" = Table.TransformColumns(#"Expanded Column1", {{"UsageStartTime", each Text.BetweenDelimiters(_, "(", ")"), type text}}),
+    #"Extracted Text Between Delimiters1" = Table.TransformColumns(#"Extracted Text Between Delimiters", {{"UsageEndTime", each Text.BetweenDelimiters(_, "(", ")"), type text}}),
+    #"Changed Type" = Table.TransformColumnTypes(#"Extracted Text Between Delimiters1",{{"UsageStartTime", Int64.Type}}),
+    #"Added Custom" = Table.AddColumn(#"Changed Type", "UsageStart", each #datetime(1970, 1, 1, 0, 0, 0 ) + #duration(0, 0, 0, [UsageStartTime]/1000)),
+    #"Changed Type1" = Table.TransformColumnTypes(#"Added Custom",{{"UsageEndTime", Int64.Type}}),
+    #"Added Custom1" = Table.AddColumn(#"Changed Type1", "UsageEnd", each #datetime(1970, 1, 1, 0, 0, 0 ) + #duration(0, 0, 0, [UsageEndTime]/1000)),
+    #"Parsed JSON" = Table.TransformColumns(#"Added Custom1",{{"InstanceData", Json.Document}}),
+    #"Expanded InstanceData" = Table.ExpandRecordColumn(#"Parsed JSON", "InstanceData", {"Microsoft.Resources"}, {"Microsoft.Resources"}),
+    #"Expanded Microsoft.Resources" = Table.ExpandRecordColumn(#"Expanded InstanceData", "Microsoft.Resources", {"resourceUri", "location", "tags", "additionalInfo"}, {"resourceUri", "location.1", "tags.1", "additionalInfo"}),
+    #"Added Custom2" = Table.AddColumn(#"Expanded Microsoft.Resources", "ResourceGroup", each Text.BetweenDelimiters(Text.Lower([resourceUri]), "resourcegroups/", "/")),
+    #"Parsed JSON1" = Table.TransformColumns(#"Added Custom2",{{"additionalInfo", Json.Document}}),
+    #"Expanded additionalInfo" = Table.ExpandRecordColumn(#"Parsed JSON1", "additionalInfo", {"ServiceType", "ImageType", "Publisher", "Offer", "Sku"}, {"ServiceType", "ImageType", "Publisher", "Offer", "Sku"}),
+    #"Replaced Value" = Table.ReplaceValue(#"Expanded additionalInfo",".",",",Replacer.ReplaceText,{"Quantity"}),
+    #"Changed Type2" = Table.TransformColumnTypes(#"Replaced Value",{{"Quantity", type number}})
+in
+    #"Changed Type2"
