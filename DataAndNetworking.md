@@ -15,12 +15,22 @@ Check [README](./README.md)
 ## Step 1 - using Blob Storage
 
 ## Step 2 - using Table Storage
+Since this is not programming class we will observe Table storage via [Azure Storage Explorer](https://www.storageexplorer.com/).
+
+1. Use Storage Explorer to connect to storage account.
+2. Create new table.
+3. Use import button and select [data/zoopraha.csv](data/zoopraha.csv) data file.
+4. Observe table structure.
+5. Filter by PartitionKey (region), eg. Evropa.
+6. Further filter by biotop, eg. hory
+
+There are SDKs to multiple programming languages available. Also querying table can be done using HTTP interface with standard OData filtering syntax.
 
 ## Step 3 - using SQL Resource Provider
 
 ## Step 4 - native networking services including VNETs, NSGs and LBs
 
-## Step 5 - deploying enterprise-grade firewall/VPN
+## Step 5 - deploying Fortinet inside tenant environment
 
 ## Step 6 - deploying enterprise-grade reverse proxy / Web Application Firewall
 
