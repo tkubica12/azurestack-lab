@@ -30,7 +30,7 @@ In storage explorer right click on table to generate access token (SAS). Note yo
 
 ```powershell
 # Store full URL with SAS token
-$url = "https://dataspringdemo.table.core.windows.net/zoo?st=2019-07-13T18%3A07%3A17Z&se=2019-07-14T18%3A07%3A17Z&sp=raud&sv=2018-03-28&tn=zoo&sig=D%2BTtER2JNNGtdEqazJHvJoVFKGQfgpPrJejMGQU%2FJZc%3D"
+$url = "https://youraccount.table.core.windows.net/zoo?st=2019-07-13T18%3A07%3A17Z&se=2019-07-14T18%3A07%3A17Z&sp=raud&sv=2018-03-28&tn=zoo&sig=somethingsomething"
 
 # Prepare headers to get JSON output without metadata
 $headers = New-Object "System.Collections.Generic.Dictionary[[String],[String]]"
