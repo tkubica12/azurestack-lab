@@ -47,5 +47,5 @@ We will split content into four training days:
 - [Day 1: Infrastructure services](./InfrastructureServices.md)
 - [Day 2: Application platforms](./ApplicationPlatforms.md)
 - [Day 3 part 1: Data services](./DataServices.md)
-- [Day 3 part 1: Advanced Networking](./AdvancedNetworking.md)
+- [Day 3 part 2: Advanced Networking](./AdvancedNetworking.md)
 - [Day 4: Azure Stack operator training](./Operator.md)
