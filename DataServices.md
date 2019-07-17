@@ -1,13 +1,9 @@
 # Azure Stack lab - Day 3: Data and networking services
-During third day we will practice:
+During first half of third day we will practice:
 - Data services
   - Using Azure Stack storage services
-  - Using SQL Resource Provider
-- Advanced networking scenarios
-  - Depolying enterprise-grade firewall (eg. CheckPoint or Fortinet)
-  - Deploying enterprise-grade WAF (eg. F5)
-  - Using Azure Stack VPN
-  - Provisioning 3rd party VPN service
+  - Using SQL Resource Provider (PaaS shared style)
+  - Deploying SQL server from template (IaaS dedicated style)
 
 ## Prerequisities
 Check [README](./README.md)
@@ -86,14 +82,3 @@ There are SDKs to multiple programming languages available. Also querying table 
 
 In storage explorer right click on table to generate access token (SAS). Note you can define different tokens with different restrictions including query, add, delete, update. You can do time restriction (limited validity) or even restrict to particular PartitionKey or RowKey ranges (eg. get access to)
 
-## Step 5 - using SQL Resource Provider
-
-## Step 6 - native networking services including VNETs, NSGs and LBs
-
-## Step 7 - deploying Fortinet inside tenant environment
-
-## Step 8 - deploying enterprise-grade reverse proxy / Web Application Firewall
-
-## Step 9 - using Azure Stack VPN
-
-## Step 10 - automated provisioning of 3rd party VPN connector
