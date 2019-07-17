@@ -1,4 +1,4 @@
-# Azure Stack lab - Day 3: Data and networking services
+# Azure Stack lab - Day 3 part 2: Advanced Networking
 During second half of third day we will practice:
 - Advanced networking scenarios
   - Depolying enterprise-grade firewall (eg. CheckPoint or Fortinet)

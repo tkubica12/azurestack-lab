@@ -1,4 +1,4 @@
-# Azure Stack lab - Day 3: Data and networking services
+# Azure Stack lab - Day 3 part 1: Data services
 During first half of third day we will practice:
 - Data services
   - Using Azure Stack storage services
