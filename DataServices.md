@@ -82,3 +82,6 @@ There are SDKs to multiple programming languages available. Also querying table 
 
 In storage explorer right click on table to generate access token (SAS). Note you can define different tokens with different restrictions including query, add, delete, update. You can do time restriction (limited validity) or even restrict to particular PartitionKey or RowKey ranges (eg. get access to)
 
+## Step 5 - Using SQL Resource Provider (PaaS shared style)
+
+## Step 6 - Provisioning dedicated SQL Server (IaaS dedicated style)
