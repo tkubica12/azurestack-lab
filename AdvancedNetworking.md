@@ -61,12 +61,158 @@ az network vnet subnet create -n f5 `
 ```
 
 We will configure subnet-level Network Security Groups to achieve the following:
-* jump - access from Internet on port 3389 (RDP), no outbound restrictions
-* web - access from Internet on port 80 (web), access from jump on port 22 (SSH), no outbound restrictions 
-* db - access from web subnet on port 1433 (SQL), access from jump on port 3389 (RDP), no outbound restrictions
-* fg-int - no NSG configured (no restrictions)
-* fg-ext - access from Internet on port 80 and 443, no outbound restrictions
-* f5 - access from Internet on port 80 and 443 (published applications), access from jump subnet on port 8443 and 22 (management ports), no outbound restrictions
+* jump - access from Internet on port 3389+22 (management), no outbound restrictions
+* web - access from Internet on port 80 (web), access from jump on port 3389+22 (management), no outbound restrictions 
+* db - access from web subnet on port 1433 (SQL), access from jump on port 3389+22 (management), no outbound restrictions
+* fg-int - TBD
+* fg-ext - TBD
+* f5 - access from Internet on port 80 and 443 (published applications), access from jump subnet on port 8443 and 22 (management), no outbound restrictions
+
+```powershell
+# Jump firewalling
+$subnetId = $(az network vnet subnet show -g net-rg --name jump --vnet-name net --query id -o tsv)
+az network nsg create -n jump-nsg -g net-rg
+az network nsg rule create -g net-rg `
+    --nsg-name jump-nsg `
+    -n AllowManagementFromInternet `
+    --priority 100 `
+    --source-address-prefixes '*' `
+    --source-port-ranges '*' `
+    --destination-address-prefixes '*' `
+    --destination-port-ranges 3389 22 `
+    --access Allow `
+    --protocol Tcp `
+    --description "Allow management from Internet"
+az network vnet subnet update -g net-rg `
+    -n jump `
+    --vnet-name net `
+    --network-security-group jump-nsg
+
+# Web firewalling
+$subnetId = $(az network vnet subnet show -g net-rg --name web --vnet-name net --query id -o tsv)
+az network nsg create -n web-nsg -g net-rg
+az network nsg rule create -g net-rg `
+    --nsg-name web-nsg `
+    -n AllowManagementFromJump `
+    --priority 100 `
+    --source-address-prefixes 10.0.0.0/24 `
+    --source-port-ranges '*' `
+    --destination-address-prefixes '*' `
+    --destination-port-ranges 3389 22 `
+    --access Allow `
+    --protocol Tcp `
+    --description "Allow management from Jump subnet"
+az network nsg rule create -g net-rg `
+    --nsg-name web-nsg `
+    -n DenyManagement `
+    --priority 110 `
+    --source-address-prefixes '*' `
+    --source-port-ranges '*' `
+    --destination-address-prefixes '*' `
+    --destination-port-ranges 3389 22 `
+    --access Deny `
+    --protocol Tcp `
+    --description "Deny management"
+az network nsg rule create -g net-rg `
+    --nsg-name web-nsg `
+    -n AllowWebFromInternet `
+    --priority 120 `
+    --source-address-prefixes '*' `
+    --source-port-ranges '*' `
+    --destination-address-prefixes '*' `
+    --destination-port-ranges 80 443 `
+    --access Deny `
+    --protocol Tcp `
+    --description "Allow web from Internet"
+az network vnet subnet update -g net-rg `
+    -n web `
+    --vnet-name net `
+    --network-security-group web-nsg
+
+# DB firewalling
+$subnetId = $(az network vnet subnet show -g net-rg --name db --vnet-name net --query id -o tsv)
+az network nsg create -n db-nsg -g net-rg
+az network nsg rule create -g net-rg `
+    --nsg-name db-nsg `
+    -n AllowManagementFromJump `
+    --priority 100 `
+    --source-address-prefixes 10.0.0.0/24 `
+    --source-port-ranges '*' `
+    --destination-address-prefixes '*' `
+    --destination-port-ranges 3389 22 `
+    --access Allow `
+    --protocol Tcp `
+    --description "Allow management from Jump subnet"
+az network nsg rule create -g net-rg `
+    --nsg-name db-nsg `
+    -n DenyManagement `
+    --priority 110 `
+    --source-address-prefixes '*' `
+    --source-port-ranges '*' `
+    --destination-address-prefixes '*' `
+    --destination-port-ranges 3389 22 `
+    --access Deny `
+    --protocol Tcp `
+    --description "Deny management"
+az network nsg rule create -g net-rg `
+    --nsg-name db-nsg `
+    -n AllowDbFromWeb `
+    --priority 120 `
+    --source-address-prefixes 10.0.2.0/24 `
+    --source-port-ranges '*' `
+    --destination-address-prefixes '*' `
+    --destination-port-ranges 1433 `
+    --access Allow `
+    --protocol Tcp `
+    --description "Allow DB from web subnet"
+az network vnet subnet update -g net-rg `
+    -n db `
+    --vnet-name net `
+    --network-security-group db-nsg
+
+# F5 firewalling
+$subnetId = $(az network vnet subnet show -g net-rg --name f5 --vnet-name net --query id -o tsv)
+az network nsg create -n f5-nsg -g net-rg
+az network nsg rule create -g net-rg `
+    --nsg-name f5-nsg `
+    -n AllowManagementFromJump `
+    --priority 100 `
+    --source-address-prefixes 10.0.0.0/24 `
+    --source-port-ranges '*' `
+    --destination-address-prefixes '*' `
+    --destination-port-ranges 8443 22 `
+    --access Allow `
+    --protocol Tcp `
+    --description "Allow management from Jump subnet"
+az network nsg rule create -g net-rg `
+    --nsg-name f5-nsg `
+    -n DenyManagement `
+    --priority 110 `
+    --source-address-prefixes '*' `
+    --source-port-ranges '*' `
+    --destination-address-prefixes '*' `
+    --destination-port-ranges 8443 22 `
+    --access Deny `
+    --protocol Tcp `
+    --description "Deny management"
+az network nsg rule create -g net-rg `
+    --nsg-name f5-nsg `
+    -n AllowWebFromInternet `
+    --priority 120 `
+    --source-address-prefixes '*' `
+    --source-port-ranges '*' `
+    --destination-address-prefixes '*' `
+    --destination-port-ranges 80 443 `
+    --access Allow `
+    --protocol Tcp `
+    --description "Allow web from web Internet"
+az network vnet subnet update -g net-rg `
+    -n f5 `
+    --vnet-name net `
+    --network-security-group f5-nsg
+
+```
+
 
 ## Step XX - deploying Fortinet inside tenant environment
 Note Fortinet currenly offers GUI deployment model only for basic non-HA setup. Clustered deployments are being developed by Fortinet on their [GitHub](https://github.com/fortinetsolutions/Azure-Templates). Please consult with Fortinet on their roadmap and supported scenarios for Azure Stack.
