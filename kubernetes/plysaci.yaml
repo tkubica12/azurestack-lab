@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: plysaci
+  labels:
+    app: plysaci
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: plysaci
+  template:
+    metadata:
+      labels:
+        app: plysaci
+    spec:
+      containers:
+        - name: plysaci
+          image: tkubica/plysaci:latest
+          ports:
+            - containerPort: 80
+          resources:
+            requests:
+              cpu: 500m
+              memory: 256M
+            limits:
+              cpu: 1
+              memory: 512M
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: plysaci
+spec:
+  selector:
+    app: plysaci
+  type: LoadBalancer
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 80

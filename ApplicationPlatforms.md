@@ -354,6 +354,29 @@ Todo application will return error for some time, but Pod will be recreated and 
 For production scenarios use SQL in AlwaysOn replicated cluster configuration using Kubernetes Operator. Note that as Kubernetes user you are responsible for HA, patching and licensing of your SQL. If Azure Stack provider operates managed SQL as a Service that might be easier for you to use as operator manages and upgrades SQL for you.
 
 ## Step 12 - deploy Azure cognitive services in Kubernetes in Azure Stack
+A lot of Microsoft Cognitive Services (AI) can be deployed as container in Azure Stack to provide local AI capabilities. ML model is deployed and used locally so no customer data leave Azure Stack while container and Azure is connected just for billing purposes. Please have a look into [documentation](https://docs.microsoft.com/en-us/azure/cognitive-services/cognitive-services-container-support) to understand what is available.
+
+In our example I have trained simplistic custom vision model to recognize two stuffed toys using Microsoft [Custom Vision](https://www.customvision.ai) and exported as Docker container tkubica/plysaci:latest on Docker Hub.
+
+Deploy container and Service.
+
+```powershell
+kubectl apply -f plysaci.yaml
+kubectl get service
+```
+
+Now let's send image to our model deployed in Kubernetes in Azure Stack.
+
+```powershell
+# Get service IP address
+$ip = "$(kubectl get service plysaci -o jsonpath='{.status.loadBalancer.ingress[0].ip}')"
+
+# Ask AI by sending image to it
+$results = Invoke-RestMethod -Method Post -ContentType application/octet-stream -InFile .\plysaci.jpg -Uri $ip/image
+
+# Check results - rectangles of objects and probabilities (you typically filter predictions with less than 50% prebability)
+$results.predictions
+```
 
 ## Step 13 - Use Azure Container Registry to store and build images
 
