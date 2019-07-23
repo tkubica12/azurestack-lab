@@ -113,3 +113,53 @@ CREATE DATABASE tomas2;
 ```
 
 ## Step 6 - Provisioning dedicated SQL Server (IaaS dedicated style)
+In this step we will create dedicated SQL Server 2017 using automated provisioning. In GUI create new SQL using Server 2017 Standard (or Enterprise) on Windows Server 2016 wizard.
+
+In step 4 configure SQL to be access over Internet directly, enable SQL Authentication, automated patching and automated backup to storage account.
+
+When VM is created and SQL Server automatically configured get its public IP and connect to it using Azure Data Studio. Since now you own whole server we can create multiple databases.
+
+```SQL
+CREATE DATABASE app1;
+GO
+
+USE app1;
+
+CREATE TABLE Customers (
+  CustomerId int NOT NULL PRIMARY KEY,
+  CustomerName nvarchar(255) NOT NULL
+);
+
+INSERT INTO Customers
+VALUES  (1, 'Tomas'),
+        (2, 'Karel');
+
+GO
+
+CREATE DATABASE app2;
+GO
+
+USE app2;
+
+CREATE TABLE People (
+  PersonId int NOT NULL PRIMARY KEY,
+  PersonName nvarchar(255) NOT NULL
+);
+
+INSERT INTO People
+VALUES  (1, 'Tomas'),
+        (2, 'Karel');
+
+CREATE TABLE Animals (
+  AnimalId int NOT NULL PRIMARY KEY,
+  AnimalName nvarchar(255) NOT NULL
+);
+
+INSERT INTO Animals
+VALUES  (1, 'Certik'),
+        (2, 'Vlocka');
+
+GO
+```
+
+Open your SQL VM in Azure Stack portal and check SQL server configuration page from which you can do basic monitoring and setup things like patching or backup.
