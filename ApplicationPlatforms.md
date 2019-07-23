@@ -30,7 +30,7 @@ Try multiple times and you should see about 20% of responses comming from new ve
 
 After sime time we feel confident with new version, let's swap the slots and release to production. What was test before will become production and previous production will be in test (so you can easily switch back if something goes wrong). Go to Deploment Slots and select Swap. After operation is complete you should see only new version.
 
-You application is now very popular and you need more performance to handle load. Add additional application node by going to Scale out (App Service plan) and increase number to 2. There are now additional steps required, after couple of minutes you have dobled your performance. You also scale back to 1 and because reverse proxy which is part of PaaS holds connections there should be no impact on availability. 
+You application is now very popular and you need more performance to handle load. Add additional application nodes by going to Scale out (App Service plan) in Azure Stack portal and increase number to 2. There are now additional steps required, after couple of minutes you have dobled your performance. You also scale back to 1 and because reverse proxy which is part of PaaS holds connections there should be no impact on availability. 
 
 ## Step 2 - use developer tooling to integrate Azure Stack with your development environment or CI/CD pipeline
 
