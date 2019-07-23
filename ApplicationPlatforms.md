@@ -149,7 +149,7 @@ Next we need to generate SSH keys. You can use [https://www.puttygen.com/](https
 
 Go to Azure Stack portal and run Kubernetes wizard. We will create non-HA cluster with one master node and for worker nodes use 2 nodes. Enter your service principal (application id), secret and also paste your public SSH key.
 
-Now we have some time to understand Kubernetes basics. Instructor will go throw [presentation in Czech](https://github.com/tkubica12/kubernetes-demo/raw/master/PPT-CZ/Kubernetes%20-%20jak%20funguje.pptx)
+Now we have some time to learn Kubernetes basics. Instructor will go throw [presentation in Czech](https://github.com/tkubica12/kubernetes-demo/raw/master/PPT-CZ/Kubernetes%20-%20jak%20funguje.pptx)
 
 When cluster is created we will need to grap connection details from master node and copy it to your notebook so we can connect to Kubernetes from it. Use [WinSCP](https://winscp.net/eng/download.php) and point it public IP of your master node and specify default username which is azureuser. Connect.
 
