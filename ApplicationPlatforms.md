@@ -149,6 +149,8 @@ Next we need to generate SSH keys. You can use [https://www.puttygen.com/](https
 
 Go to Azure Stack portal and run Kubernetes wizard. We will create non-HA cluster with one master node and for worker nodes use 2 nodes. Enter your service principal (application id), secret and also paste your public SSH key.
 
+Now we have some time to understand Kubernetes basics. Instructor will go throw [presentation in Czech](https://github.com/tkubica12/kubernetes-demo/raw/master/PPT-CZ/Kubernetes%20-%20jak%20funguje.pptx)
+
 When cluster is created we will need to grap connection details from master node and copy it to your notebook so we can connect to Kubernetes from it. Use [WinSCP](https://winscp.net/eng/download.php) and point it public IP of your master node and specify default username which is azureuser. Connect.
 
 In panel with /home/azureuser folder press CTRL+ALT+h to see hidden files. There is .kube directory with config file. Copy full .kube folder to your C:\Users\yourusername. You should have C:\Users\yourusername\.kube\config file on your PC.
@@ -161,7 +163,7 @@ Make sure you can connect to cluster:
 kubectl get nodes
 ```
 
-In your Visual Studio COde install Kubernetes extension. New icon should appear and you should be able to see your cluster there.
+In your Visual Studio Code install Kubernetes extension. New icon should appear and you should be able to see your cluster there.
 
 ## Step 7 - create your first Pod
 Kubernetes files are stored in kubernetes folder.
