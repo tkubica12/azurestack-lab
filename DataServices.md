@@ -83,5 +83,33 @@ There are SDKs to multiple programming languages available. Also querying table 
 In storage explorer right click on table to generate access token (SAS). Note you can define different tokens with different restrictions including query, add, delete, update. You can do time restriction (limited validity) or even restrict to particular PartitionKey or RowKey ranges (eg. get access to)
 
 ## Step 5 - Using SQL Resource Provider (PaaS shared style)
+Make sure [Azure Data Studio](https://docs.microsoft.com/en-us/sql/azure-data-studio/download?view=sql-server-2017) is installed on your notebook.
+
+Use GUI to get provider-managed SQL database. Use yourname-db as database name and select one of available SKUs. Create new login and than create database.
+
+Open your Azure Data Studio and connect to your database using connection string you copy to clipboard from GUI of your database (and provide password).
+
+We can create table and fill some values and than query.
+
+```sql
+CREATE TABLE Customers (
+  CustomerId int NOT NULL PRIMARY KEY,
+  CustomerName nvarchar(255) NOT NULL
+);
+
+INSERT INTO Customers
+VALUES  (1, 'Tomas'),
+        (2, 'Karel');
+
+SELECT * FROM Customers;
+```
+
+Open servers and check you can only see your own database and tables.
+
+Note that this is Database as a Service so you do not own SQL Server. You cannot create new DATABASE using T-SQL commands. Try this query:
+
+```sql
+CREATE DATABASE tomas2;
+```
 
 ## Step 6 - Provisioning dedicated SQL Server (IaaS dedicated style)
