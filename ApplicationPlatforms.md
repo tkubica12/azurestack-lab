@@ -30,7 +30,7 @@ Try multiple times and you should see about 20% of responses comming from new ve
 
 After sime time we feel confident with new version, let's swap the slots and release to production. What was test before will become production and previous production will be in test (so you can easily switch back if something goes wrong). Go to Deploment Slots and select Swap. After operation is complete you should see only new version.
 
-You application is now very popular and you need more performance to handle load. Add additional application nodes by going to Scale out (App Service plan) in Azure Stack portal and increase number to 2. There are now additional steps required, after couple of minutes you have dobled your performance. You also scale back to 1 and because reverse proxy which is part of PaaS holds connections there should be no impact on availability. 
+You application is now very popular and you need more performance to handle load. Add additional application node by going to Scale out (App Service plan) and increase number to 2. There are now additional steps required, after couple of minutes you have dobled your performance. You also scale back to 1 and because reverse proxy which is part of PaaS holds connections there should be no impact on availability. 
 
 ## Step 2 - use developer tooling to integrate Azure Stack with your development environment or CI/CD pipeline
 
@@ -149,8 +149,6 @@ Next we need to generate SSH keys. You can use [https://www.puttygen.com/](https
 
 Go to Azure Stack portal and run Kubernetes wizard. We will create non-HA cluster with one master node and for worker nodes use 2 nodes. Enter your service principal (application id), secret and also paste your public SSH key.
 
-Now we have some time to learn Kubernetes basics. Instructor will go throw [presentation in Czech](https://github.com/tkubica12/kubernetes-demo/raw/master/PPT-CZ/Kubernetes%20-%20jak%20funguje.pptx)
-
 When cluster is created we will need to grap connection details from master node and copy it to your notebook so we can connect to Kubernetes from it. Use [WinSCP](https://winscp.net/eng/download.php) and point it public IP of your master node and specify default username which is azureuser. Connect.
 
 In panel with /home/azureuser folder press CTRL+ALT+h to see hidden files. There is .kube directory with config file. Copy full .kube folder to your C:\Users\yourusername. You should have C:\Users\yourusername\.kube\config file on your PC.
@@ -163,7 +161,7 @@ Make sure you can connect to cluster:
 kubectl get nodes
 ```
 
-In your Visual Studio Code install Kubernetes extension. New icon should appear and you should be able to see your cluster there.
+In your Visual Studio COde install Kubernetes extension. New icon should appear and you should be able to see your cluster there.
 
 ## Step 7 - create your first Pod
 Kubernetes files are stored in kubernetes folder.
@@ -356,29 +354,7 @@ Todo application will return error for some time, but Pod will be recreated and 
 For production scenarios use SQL in AlwaysOn replicated cluster configuration using Kubernetes Operator. Note that as Kubernetes user you are responsible for HA, patching and licensing of your SQL. If Azure Stack provider operates managed SQL as a Service that might be easier for you to use as operator manages and upgrades SQL for you.
 
 ## Step 12 - deploy Azure cognitive services in Kubernetes in Azure Stack
-A lot of Microsoft Cognitive Services (AI) can be deployed as container in Azure Stack to provide local AI capabilities. ML model is deployed and used locally so no customer data leave Azure Stack while container and Azure is connected just for billing purposes. Please have a look into [documentation](https://docs.microsoft.com/en-us/azure/cognitive-services/cognitive-services-container-support) to understand what is available.
-
-In our example I have trained simplistic custom vision model to recognize two stuffed toys using Microsoft [Custom Vision](https://www.customvision.ai) and exported as Docker container tkubica/plysaci:latest on Docker Hub.
-
-Deploy container and Service.
-
-```powershell
-kubectl apply -f plysaci.yaml
-kubectl get service
-```
-
-Now let's send image to our model deployed in Kubernetes in Azure Stack.
-
-```powershell
-# Get service IP address
-$ip = "$(kubectl get service plysaci -o jsonpath='{.status.loadBalancer.ingress[0].ip}')"
-
-# Ask AI by sending image to it
-$results = Invoke-RestMethod -Method Post -ContentType application/octet-stream -InFile .\plysaci.jpg -Uri $ip/image
-
-# Check results - rectangles of objects and probabilities (you typically filter predictions with less than 50% prebability)
-$results.predictions
-```
+A lot of Microsoft Cognitive Services (AI) can be deployed as container in Azure Stack to provide
 
 ## Step 13 - Use Azure Container Registry to store and build images
 
