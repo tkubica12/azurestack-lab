@@ -2,7 +2,7 @@
 During second half of third day we will practice:
 - Advanced networking scenarios
   - Depolying enterprise-grade firewall (eg. CheckPoint or Fortinet)
-  - Deploying enterprise-grade WAF (eg. F5)
+  - Deploying enterprise-grade WAF (eg. proxy)
   - Using Azure Stack VPN
   - Provisioning 3rd party VPN service
 
@@ -21,14 +21,14 @@ az cloud set -n AzureStack
 az login
 ```
 
-## Step XX - native networking services including VNETs, NSGs and LBs
+## Step 1 - virtual networks
 We will deploy VNET with following subnets:
 * jump - subnet for jump VM
 * web - subnet for web farm
 * db - subnet for database
 * fg-int - subnet for Fortinet internal NIC
 * fg-ext - subnet for Fortinet external NIC
-* f5 - subnet for F5
+* proxy - subnet for reverse proxy
 
 ```powershell
 $region = "local" 
@@ -54,11 +54,13 @@ az network vnet subnet create -n fg-ext `
     -g net-rg `
     --vnet-name net `
     --address-prefix 10.0.4.0/24
-az network vnet subnet create -n f5 `
+az network vnet subnet create -n proxy `
     -g net-rg `
     --vnet-name net `
     --address-prefix 10.0.5.0/24
 ```
+
+## Step 2 - segmentation with Network Security Groups
 
 We will configure subnet-level Network Security Groups to achieve the following:
 * jump - access from Internet on port 3389+22 (management), no outbound restrictions
@@ -66,7 +68,9 @@ We will configure subnet-level Network Security Groups to achieve the following:
 * db - access from web subnet on port 1433 (SQL), access from jump on port 3389+22 (management), no outbound restrictions
 * fg-int - TBD
 * fg-ext - TBD
-* f5 - access from Internet on port 80 and 443 (published applications), access from jump subnet on port 8443 and 22 (management), no outbound restrictions
+* proxy - access from Internet on port 80 and 443 (published applications), access from jump subnet on port 8443 and 22 (management), no outbound restrictions
+
+Note NSG can also be applied on individual VMs.
 
 ```powershell
 # Jump firewalling
@@ -117,13 +121,24 @@ az network nsg rule create -g net-rg `
     --nsg-name web-nsg `
     -n AllowWebFromInternet `
     --priority 120 `
-    --source-address-prefixes '*' `
+    --source-address-prefixes "10.0.0.0/24" `
     --source-port-ranges '*' `
     --destination-address-prefixes '*' `
     --destination-port-ranges 80 443 `
     --access Deny `
     --protocol Tcp `
-    --description "Allow web from Internet"
+    --description "Allow web from Jump"
+az network nsg rule create -g net-rg `
+    --nsg-name web-nsg `
+    -n AllowWebFromInternet `
+    --priority 120 `
+    --source-address-prefixes "10.0.5.0/24" `
+    --source-port-ranges '*' `
+    --destination-address-prefixes '*' `
+    --destination-port-ranges 80 443 `
+    --access Deny `
+    --protocol Tcp `
+    --description "Allow web from Proxy"
 az network vnet subnet update -g net-rg `
     -n web `
     --vnet-name net `
@@ -170,11 +185,11 @@ az network vnet subnet update -g net-rg `
     --vnet-name net `
     --network-security-group db-nsg
 
-# F5 firewalling
-$subnetId = $(az network vnet subnet show -g net-rg --name f5 --vnet-name net --query id -o tsv)
-az network nsg create -n f5-nsg -g net-rg
+# Proxy firewalling
+$subnetId = $(az network vnet subnet show -g net-rg --name proxy --vnet-name net --query id -o tsv)
+az network nsg create -n proxy-nsg -g net-rg
 az network nsg rule create -g net-rg `
-    --nsg-name f5-nsg `
+    --nsg-name proxy-nsg `
     -n AllowManagementFromJump `
     --priority 100 `
     --source-address-prefixes 10.0.0.0/24 `
@@ -185,7 +200,7 @@ az network nsg rule create -g net-rg `
     --protocol Tcp `
     --description "Allow management from Jump subnet"
 az network nsg rule create -g net-rg `
-    --nsg-name f5-nsg `
+    --nsg-name proxy-nsg `
     -n DenyManagement `
     --priority 110 `
     --source-address-prefixes '*' `
@@ -196,7 +211,7 @@ az network nsg rule create -g net-rg `
     --protocol Tcp `
     --description "Deny management"
 az network nsg rule create -g net-rg `
-    --nsg-name f5-nsg `
+    --nsg-name proxy-nsg `
     -n AllowWebFromInternet `
     --priority 120 `
     --source-address-prefixes '*' `
@@ -207,10 +222,78 @@ az network nsg rule create -g net-rg `
     --protocol Tcp `
     --description "Allow web from web Internet"
 az network vnet subnet update -g net-rg `
-    -n f5 `
+    -n proxy `
     --vnet-name net `
-    --network-security-group f5-nsg
+    --network-security-group proxy-nsg
+```
 
+## Step XX - deploy servers
+We will now create resource groups for each tier and deploy servers.
+
+```powershell
+# Store image name as variable
+$image = "Canonical:UbuntuServer:14.04-LTS:latest"
+
+# Deploy jump server with public IP
+az group create -n jump-rg -l $region
+
+az vm create -n "jump-vm" `
+    -g jump-rg `
+    --image $image `
+    --authentication-type password `
+    --admin-username azureuser `
+    --admin-password Azure12345678 `
+    --public-ip-address jump-ip `
+    --nsg '""' `
+    --size Standard_DS1_v2 `
+    --subnet "$(az network vnet subnet show -g net-rg --name jump --vnet-name net --query id -o tsv)" `
+    --no-wait
+
+# Deploy 2 web servers in Availability Set with no public IP
+az group create -n web-rg -l $region
+
+az vm availability-set create -n web-as -g web-rg
+
+az vm create -n "web-vm-01" `
+    -g web-rg `
+    --image $image `
+    --authentication-type password `
+    --admin-username azureuser `
+    --admin-password Azure12345678 `
+    --public-ip-address '""' `
+    --nsg '""' `
+    --size Standard_DS1_v2 `
+    --availability-set web-as `
+    --subnet "$(az network vnet subnet show -g net-rg --name web --vnet-name net --query id -o tsv)" `
+    --no-wait
+
+az vm create -n "web-vm-02" `
+    -g web-rg `
+    --image $image `
+    --authentication-type password `
+    --admin-username azureuser `
+    --admin-password Azure12345678 `
+    --public-ip-address '""' `
+    --nsg '""' `
+    --size Standard_DS1_v2 `
+    --availability-set web-as `
+    --subnet "$(az network vnet subnet show -g net-rg --name web --vnet-name net --query id -o tsv)" `
+    --no-wait
+
+# Deploy database server with no public IP
+az group create -n db-rg -l $region
+
+az vm create -n "db-vm" `
+    -g db-rg `
+    --image $image `
+    --authentication-type password `
+    --admin-username azureuser `
+    --admin-password Azure12345678 `
+    --public-ip-address '""' `
+    --nsg '""' `
+    --size Standard_DS1_v2 `
+    --subnet $(az network vnet subnet show -g net-rg --name db --vnet-name net --query id -o tsv) `
+    --no-wait
 ```
 
 
@@ -221,10 +304,10 @@ Fortinet supports advanced topologies in Azure including active/passive HA (depl
 
 Fortinet has released [Azure Stack SDN Fabric Connector](https://docs.fortinet.com/document/fortigate/6.2.0/cookbook/633088) to ready dynamic objects from IaaS platform to ease configuration of Fortinet policies.
 
-## Step XX - deploying enterprise-grade reverse proxy / Web Application Firewall with F5
-Note F5 currently offers GUI deployment model only for basic non-HA and manual setup. More automated (autoconfiguration of license and Azure Stack connector) or clustered deployments are being developed by F5 on their [GitHub](https://github.com/F5Networks/f5-azure-stack-arm-templates). Please consult with F5 on their roadmap and supported scenarios for Azure Stack.
+## Step XX - deploying enterprise-grade reverse proxy / Web Application Firewall with proxy
+Note proxy currently offers GUI deployment model only for basic non-HA and manual setup. More automated (autoconfiguration of license and Azure Stack connector) or clustered deployments are being developed by proxy on their [GitHub](https://github.com/proxyNetworks/proxy-azure-stack-arm-templates). Please consult with proxy on their roadmap and supported scenarios for Azure Stack.
 
-F5 supports advanced topologies in Azure including auto-scaling group (VMSS), provisioning via Big IQ, F5 cluster behind Azure LB managed by F5 (allows for multiple public IPs in automated way), per-app F5 and multi-NIC configurations. For Azure Stack they currently support single-VM single-NIC basic deployments.
+proxy supports advanced topologies in Azure including auto-scaling group (VMSS), provisioning via Big IQ, proxy cluster behind Azure LB managed by proxy (allows for multiple public IPs in automated way), per-app proxy and multi-NIC configurations. For Azure Stack they currently support single-VM single-NIC basic deployments.
 
 
 ## Step XX - using Azure Stack VPN
