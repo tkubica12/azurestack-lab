@@ -319,14 +319,11 @@ ssh azureuser@web-vm-01
     ssh azureuser@db-vm
 ```
 
-
-
-
 ## Step 4 - internal load balancer
 
 Azure Stack comes with software-defined load balancer. We can configure LB with public IP or LB with internal IP. In this demo we will use internal VIP.
 
-First we will install simple static web. CoOnnect to jump VM and from it to web-vm-01 a install web service. THan connect to web-vm-02 and install web service. Make sure you can see both webs from jump server.
+First we will install simple static web. Connect to jump VM and from it to web-vm-01 a install web service. THan connect to web-vm-02 and install web service. Make sure you can see both webs from jump server.
 
 ```powershell
 ssh azureuser@web-vm-01
@@ -340,6 +337,60 @@ ssh azureuser@web-vm-02
 curl web-vm-01
 curl web-vm-02
 ```
+
+Configure load balancer
+
+```powershell
+# Create Load Balancer
+az network lb create -n mylb `
+    -g web-rg `
+    --subnet "$(az network vnet subnet show -g net-rg --name web --vnet-name net --query id -o tsv)" `
+    --public-ip-address '""' `
+    --private-ip-address 10.0.1.100 `
+    --frontend-ip-name front `
+    --backend-pool-name pool
+
+# Create health probe
+az network lb probe create -n myprobe `
+    -g web-rg `
+    --lb-name mylb `
+    --protocol tcp `
+    --port 80
+
+# Create rule
+az network lb rule create -n webrule `
+    -g web-rg `
+    --lb-name mylb `
+    --protocol tcp `
+    --frontend-port 80 `
+    --backend-port 80 `
+    --frontend-ip-name front `
+    --backend-pool-name pool `
+    --probe-name myprobe
+
+# Add web VM NICs to backend pool
+az network nic ip-config update --nic-name web-vm-01VMNic `
+    -n ipconfigweb-vm-01 `
+    -g web-rg `
+    --lb-name mylb `
+    --lb-address-pools pool
+
+az network nic ip-config update --nic-name web-vm-02VMNic `
+    -n ipconfigweb-vm-02 `
+    -g web-rg `
+    --lb-name mylb `
+    --lb-address-pools pool
+```
+
+Connect to jump-vm and from it access private VIP.
+
+```powershell
+curl 10.0.1.100
+```
+
+## Step 5 - deploy reverse proxy
+
+
 
 ## Step XX - deploying Fortinet inside tenant environment
 **Notes:**
