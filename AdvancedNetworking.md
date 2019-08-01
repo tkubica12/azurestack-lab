@@ -319,12 +319,37 @@ ssh azureuser@web-vm-01
     ssh azureuser@db-vm
 ```
 
+
+
+
+## Step 4 - internal load balancer
+
+Azure Stack comes with software-defined load balancer. We can configure LB with public IP or LB with internal IP. In this demo we will use internal VIP.
+
+First we will install simple static web. CoOnnect to jump VM and from it to web-vm-01 a install web service. THan connect to web-vm-02 and install web service. Make sure you can see both webs from jump server.
+
+```powershell
+ssh azureuser@web-vm-01
+    sudo apt update && sudo apt install nginx -y
+    echo "v1: Hi from $HOSTNAME" | sudo tee /var/www/html/index.html
+    exit
+ssh azureuser@web-vm-02
+    sudo apt update && sudo apt install nginx -y
+    echo "v1: Hi from $HOSTNAME" | sudo tee /var/www/html/index.html
+    exit
+curl web-vm-01
+curl web-vm-02
+```
+
 ## Step XX - deploying Fortinet inside tenant environment
-Note Fortinet currenly offers GUI deployment model only for basic non-HA setup. Clustered deployments are being developed by Fortinet on their [GitHub](https://github.com/fortinetsolutions/Azure-Templates). Please consult with Fortinet on their roadmap and supported scenarios for Azure Stack.
+**Notes:**
+_Fortinet currenly offers GUI deployment model only for basic non-HA setup. Clustered deployments are being developed by Fortinet on their [GitHub](https://github.com/fortinetsolutions/Azure-Templates). Please consult with Fortinet on their roadmap and supported scenarios for Azure Stack._
 
-Fortinet supports advanced topologies in Azure including active/passive HA (deployments requiring VPN services) and active/active HA (NGFW deployments) including auto-scaling capabilities (VMSS). For Azure Stack they currently support single-VM basic deployments.
+_Fortinet supports advanced topologies in Azure including active/passive HA (deployments requiring VPN services) and active/active HA (NGFW deployments) including auto-scaling capabilities (VMSS). For Azure Stack they currently support single-VM basic deployments._
 
-Fortinet has released [Azure Stack SDN Fabric Connector](https://docs.fortinet.com/document/fortigate/6.2.0/cookbook/633088) to ready dynamic objects from IaaS platform to ease configuration of Fortinet policies.
+_Fortinet has released [Azure Stack SDN Fabric Connector](https://docs.fortinet.com/document/fortigate/6.2.0/cookbook/633088) to ready dynamic objects from IaaS platform to ease configuration of Fortinet policies._
+
+
 
 ## Step XX - deploying enterprise-grade reverse proxy / Web Application Firewall with proxy
 Note proxy currently offers GUI deployment model only for basic non-HA and manual setup. More automated (autoconfiguration of license and Azure Stack connector) or clustered deployments are being developed by proxy on their [GitHub](https://github.com/proxyNetworks/proxy-azure-stack-arm-templates). Please consult with proxy on their roadmap and supported scenarios for Azure Stack.
