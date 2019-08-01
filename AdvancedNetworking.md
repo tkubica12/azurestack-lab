@@ -119,24 +119,24 @@ az network nsg rule create -g net-rg `
     --description "Deny management"
 az network nsg rule create -g net-rg `
     --nsg-name web-nsg `
-    -n AllowWebFromInternet `
+    -n AllowWebFromJump `
     --priority 120 `
     --source-address-prefixes "10.0.0.0/24" `
     --source-port-ranges '*' `
     --destination-address-prefixes '*' `
     --destination-port-ranges 80 443 `
-    --access Deny `
+    --access Allow `
     --protocol Tcp `
     --description "Allow web from Jump"
 az network nsg rule create -g net-rg `
     --nsg-name web-nsg `
-    -n AllowWebFromInternet `
-    --priority 120 `
+    -n AllowWebFromProxy `
+    --priority 130 `
     --source-address-prefixes "10.0.5.0/24" `
     --source-port-ranges '*' `
     --destination-address-prefixes '*' `
     --destination-port-ranges 80 443 `
-    --access Deny `
+    --access Allow `
     --protocol Tcp `
     --description "Allow web from Proxy"
 az network vnet subnet update -g net-rg `
@@ -389,7 +389,66 @@ curl 10.0.1.100
 ```
 
 ## Step 5 - deploy reverse proxy
+As alternative to simple built-in L4 balancer we will now deploy 3rd party reverse proxy such as F5. In our demo we will use Linux machinw with NGINX.
 
+Deploy Linux VM in proxy subnet including public IP.
+
+```powershell
+az group create -n proxy-rg -l $region
+
+az vm create -n "proxy-vm" `
+    -g proxy-rg `
+    --image $image `
+    --authentication-type password `
+    --admin-username azureuser `
+    --admin-password Azure12345678 `
+    --public-ip-address proxy-ip `
+    --nsg '""' `
+    --size Standard_DS1_v2 `
+    --subnet "$(az network vnet subnet show -g net-rg --name proxy --vnet-name net --query id -o tsv)"
+```
+
+Get proxy public IP and make sure NSG do not allow SSH access from Internet while it is accessible from jump-vm.
+
+```powershell
+az network public-ip show -n proxy-ip -g proxy-rg --query ipAddress -o tsv
+
+# SSH directly to proxy-vm via public IP - this should fail because of our NSG rules
+
+# Connect from jump-vm
+ssh azureuser@proxy-vm
+```
+
+Now let's install NGINX and configure reverse proxy in proxy-vm. For simplicity we will point nginx to load balancer we have configured previously, but if you need things like cookie session persistence, you may create upstream object a balance on NGINX directly.
+
+```powershell
+ssh azureuser@proxy-vm
+    sudo -i
+    apt update 
+    apt install nginx -y
+    rm /etc/nginx/sites-enabled/default
+
+    # Paste this as block
+cat << EOF > /etc/nginx/conf.d/myapp.conf
+server {
+
+    root /var/www/html;
+
+    index index.html index.htm;
+
+    server_name _;
+
+    listen 80 default_server;
+
+    location / {
+        proxy_pass http://10.0.1.100/;
+    }
+}
+EOF
+    # End of block
+
+    nginx -s reload
+```
 
 
 ## Step XX - deploying Fortinet inside tenant environment
