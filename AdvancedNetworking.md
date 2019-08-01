@@ -456,7 +456,7 @@ EOF
 ```
 
 
-## Step XX - deploying Fortinet inside tenant environment
+## Step 6 - deploy Fortinet inside tenant environment
 **Notes:**
 _Fortinet currenly offers GUI deployment model only for basic non-HA setup. Clustered deployments are being developed by Fortinet on their [GitHub](https://github.com/fortinetsolutions/Azure-Templates). Please consult with Fortinet on their roadmap and supported scenarios for Azure Stack._
 
@@ -464,11 +464,53 @@ _Fortinet supports advanced topologies in Azure including active/passive HA (dep
 
 _Fortinet has released [Azure Stack SDN Fabric Connector](https://docs.fortinet.com/document/fortigate/6.2.0/cookbook/633088) to ready dynamic objects from IaaS platform to ease configuration of Fortinet policies._
 
+Use Portal to install Fortigate. Specify ngfw-int and ngfw-ext subnets we created before. After Fortinet boots connect to it using credentials you used in wizard and upload your license file.
 
+Configure Fortigate:
+* Set IP on Port 2 (internal network) eg. by switching to DHCP mode
+* Configure routing:
+  * 0.0.0.0/0 should leave via port 1 (nexthop 10.0.4.1)
+  * 10.0.0.0/16 (our VNET) should leave via port 2 (nexthop 10.0.3.1)
+* Configure policy from port2 to port1 with NAT enabled
+* Look at FortiView All sessions - there will be no traffic going throw
 
-## Step XX - deploying enterprise-grade reverse proxy / Web Application Firewall with proxy
+From jump-vm connect to db-vm and access something on Internet. We have not blocked such traffic with NSG so it will work, but default routing is handled by Azure, not Fortinet.
 
+```powershell
+ssh azureuser@db-vm
+    curl https://www.tomaskubica.cz
+```
 
+Now we need to configure routing in Azure Stack SDN so traffic goes via Fortigate. Suppose we want all internal traffic in VNET to be routed by Azure a filtered with NSG, but for downloads from Internet we want to go throw NGFW. Let's do this.
+
+```powershell
+# Create routing table set
+az network route-table create -g net-rg -n db-routing
+
+# Create default route with Fortigate private IP as next hop
+az network route-table route create -g net-rg `
+    --route-table-name db-routing `
+    -n internetViaNgfw `
+    --next-hop-type VirtualAppliance `
+    --address-prefix "0.0.0.0/0" `
+    --next-hop-ip-address "10.0.3.4"
+
+# Apply routing rules to db subnet
+az network vnet subnet update -n db `
+    --vnet-name net `
+    -g net-rg `
+    --route-table db-routing
+```
+
+How to check routing tables in Azure? VNET behaves like a router, but in fact it is fully distributed SDN system and routing is done on host node level. We can get effective routes on per-NIC basis - check it out for db-vm.
+
+```powershell
+az network nic show-effective-route-table -g db-rg -n db-vmVMNic -o table
+```
+
+You should source Default (system configured) on 0.0.0.0/0 showing Invalid meaning it is replaced by source User (user defined) inserting Fortigate in path.
+
+Switch to db-vm a curl some page. Go back to Fortigate FortiView and you should see our traffic there.
 
 ## Step XX - using Azure Stack VPN
 
