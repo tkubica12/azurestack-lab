@@ -389,6 +389,11 @@ curl 10.0.1.100
 ```
 
 ## Step 5 - deploy reverse proxy
+**Notes:**
+_When using F5 it currently offers GUI deployment model only for basic non-HA and manual setup. More automated (autoconfiguration of license and Azure Stack connector) or clustered deployments are being developed by proxy on their [GitHub](https://github.com/proxyNetworks/proxy-azure-stack-arm-templates). Please consult with proxy on their roadmap and supported scenarios for Azure Stack._
+
+_F5 supports advanced topologies in Azure including auto-scaling group (VMSS), provisioning via Big IQ, proxy cluster behind Azure LB managed by proxy (allows for multiple public IPs in automated way), per-app proxy and multi-NIC configurations. For Azure Stack they currently support single-VM single-NIC basic deployments._
+
 As alternative to simple built-in L4 balancer we will now deploy 3rd party reverse proxy such as F5. In our demo we will use Linux machinw with NGINX.
 
 Deploy Linux VM in proxy subnet including public IP.
@@ -462,9 +467,7 @@ _Fortinet has released [Azure Stack SDN Fabric Connector](https://docs.fortinet.
 
 
 ## Step XX - deploying enterprise-grade reverse proxy / Web Application Firewall with proxy
-Note proxy currently offers GUI deployment model only for basic non-HA and manual setup. More automated (autoconfiguration of license and Azure Stack connector) or clustered deployments are being developed by proxy on their [GitHub](https://github.com/proxyNetworks/proxy-azure-stack-arm-templates). Please consult with proxy on their roadmap and supported scenarios for Azure Stack.
 
-proxy supports advanced topologies in Azure including auto-scaling group (VMSS), provisioning via Big IQ, proxy cluster behind Azure LB managed by proxy (allows for multiple public IPs in automated way), per-app proxy and multi-NIC configurations. For Azure Stack they currently support single-VM single-NIC basic deployments.
 
 
 ## Step XX - using Azure Stack VPN
