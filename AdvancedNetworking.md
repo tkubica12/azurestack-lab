@@ -227,7 +227,7 @@ az network vnet subnet update -g net-rg `
     --network-security-group proxy-nsg
 ```
 
-## Step XX - deploy servers
+## Step 3 - deploy servers
 We will now create resource groups for each tier and deploy servers.
 
 ```powershell
@@ -296,6 +296,28 @@ az vm create -n "db-vm" `
     --no-wait
 ```
 
+We will now test connectivity. Get public IP of jump server and SSH to it (eg. use Putty or install WIndows SSH client in Windows 10).
+
+```powershell
+az network public-ip show -n jump-ip -g jump-rg --query ipAddress -o tsv
+```
+
+Check IP on jump VM ("ip a") and note it is from private network (Azure Stack does 1:1 IP NAT when traffic goes out or in Azure Stack). Also check that internal DNS works, eg. ping web-vm-01.
+
+Make sure you can connect to both web and db servers from jump on port 22 (SSH).
+
+```powershell
+ssh azureuser@web-vm-01
+    exit
+ssh azureuser@db-vm
+    exit
+```
+
+To check our NSGs make sure you cannot SSH from web VM to DB VM.
+```powershell
+ssh azureuser@web-vm-01
+    ssh azureuser@db-vm
+```
 
 ## Step XX - deploying Fortinet inside tenant environment
 Note Fortinet currenly offers GUI deployment model only for basic non-HA setup. Clustered deployments are being developed by Fortinet on their [GitHub](https://github.com/fortinetsolutions/Azure-Templates). Please consult with Fortinet on their roadmap and supported scenarios for Azure Stack.
@@ -313,3 +335,16 @@ proxy supports advanced topologies in Azure including auto-scaling group (VMSS),
 ## Step XX - using Azure Stack VPN
 
 ## Step XX - automated provisioning of 3rd party VPN connector
+
+## Step XX - Cleanup
+
+```powershell
+az group delete -n web-rg --no-wait -y
+az group delete -n jump-rg --no-wait -y
+az group delete -n db-rg --no-wait -y
+az group delete -n proxy-rg --no-wait -y
+az group delete -n fortinet-rg --no-wait -y
+
+# When VM resources are deleted, destroy network
+az group delete -n net-rg --no-wait -y 
+```
