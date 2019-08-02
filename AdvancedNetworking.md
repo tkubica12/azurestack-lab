@@ -512,6 +512,105 @@ You should source Default (system configured) on 0.0.0.0/0 showing Invalid meani
 
 Switch to db-vm a curl some page. Go back to Fortigate FortiView and you should see our traffic there.
 
+## Step 7 - using Fortinet to inspect selected internal traffic
+So far we have used Fortigate to manage Internet acess, but with that setup we can easily add destination NAT (opening internal IPs) or building VPNs.
+
+What about using Fortigate to protect internal tenant traffic in Azure Stack? For simplicity, latency and costs you should prefer doing segmentation with subnets and NSGs, but sometimes you might want to leverage Fortigate to bring more features. Eg. it is not good idea to put Fortigate between application and its database, but if you host multiple different projects you might want to put Fortigate between them in case you cannot isolate them to different VNETs (because you require some communication on APIs etc.), but at the same time projects do not trust each other and need more than L4 security between them.
+
+In next section we will want to put Fortinet on traffic between proxy-vm and web subnet.
+
+We can start configure Fortigate using IP addresses and subnets, but let's use fabric connector for Azure and Azure Stack so Fortigate can dynamicaly obtain low-level details by polling metadata.
+
+Create new configuration in Security Fabric -> Security Connectors -> Azure.
+
+Fortigate now gathers data from Azure or Azure Stack and understand IP addresses of resources including:
+* VNETs
+* subnets
+* virtual machines
+* objects with IP address contained in resource group
+* Kubernetes objects and labels
+* custom grouping based on Azure Stack tags (you can create any structure of key/value pairs on each resource)
+
+Go to Policy & Objects -> Addresses and add new. Use type Fabric Connector and investigate what options are available. As and example create address object called proxy and add Vm=proxy-vm.
+
+Suppose we need to have objects will all web VMs, but not load balancer IP or other VMs in the same subnet. How to do that in a way that we can easily add additional web server without need to modify Fortigate policies? One option would be selecting by resource group, but in our case Azure LB lives there also and we do not want it as part of object. Let's use tagging.
+
+Configure tags in Azure on web-vms.
+
+```powershell
+az resource tag --tags fortinetobject=web `
+    -g web-rg `
+    -n web-vm-01 `
+    --resource-type "Microsoft.Compute/virtualMachines"
+
+az resource tag --tags fortinetobject=web `
+    -g web-rg `
+    -n web-vm-02 `
+    --resource-type "Microsoft.Compute/virtualMachines"
+```
+
+Go to Fortigate and create object web-nodes identified by this tag.
+
+Also create object web-subnet identified by whole subnet. Note currently Fortigate adds only VM objects from Azure, not Azure LB address. 
+
+Therefore create another object web-lb with manual configuration of IP 10.0.1.100.
+
+We will now want traffic between proxy and web LB to go via appliance, but not traffic from proxy to Internet (we want to go directly there).
+
+Configure rules on Fortigate to allow traffic from proxy object to web-lb object on port 80. Not in and out port is both Port2.
+
+Now we need to modify routing in Azure to force traffic via firewall:
+* For web subnet configure rule 0.0.0.0/0 via Fortigate (traffic go outside of VNET), but also route 10.0.5.0/24 (proxy subnet). Why? Routing is using longest prefix match and default rule sends VNET traffic directly so we need to create more specific rule for proxy subnet.
+* For proxy subnet configure rule 10.0.1.0/24 (web subnet) via Fortigate
+
+```powershell
+# Create routing table sets
+az network route-table create -g net-rg -n web-routing
+az network route-table create -g net-rg -n proxy-routing
+
+# Create rules for web-routing
+az network route-table route create -g net-rg `
+    --route-table-name web-routing `
+    -n internetViaNgfw `
+    --next-hop-type VirtualAppliance `
+    --address-prefix "0.0.0.0/0" `
+    --next-hop-ip-address "10.0.3.4"
+
+az network route-table route create -g net-rg `
+    --route-table-name web-routing `
+    -n proxyViaNgfw `
+    --next-hop-type VirtualAppliance `
+    --address-prefix "10.0.5.0/24" `
+    --next-hop-ip-address "10.0.3.4"
+
+# Create rules for proxy-routing
+az network route-table route create -g net-rg `
+    --route-table-name proxy-routing `
+    -n webViaNgfw `
+    --next-hop-type VirtualAppliance `
+    --address-prefix "10.0.1.0/24" `
+    --next-hop-ip-address "10.0.3.4"
+
+# Apply routing rules to subnets
+az network vnet subnet update -n web `
+    --vnet-name net `
+    -g net-rg `
+    --route-table web-routing
+
+az network vnet subnet update -n proxy `
+    --vnet-name net `
+    -g net-rg `
+    --route-table proxy-routing
+```
+
+Check things out. Via jump-vm SSH to proxy-vm and communication to 10.0.1.100 should work while connection to individual web-vms should be blocked.
+
+```powershell
+ssh azureuser@proxy-vm
+    curl 10.0.1.100
+    curl web-vm-01
+```
+
 ## Step XX - using Azure Stack VPN
 
 ## Step XX - automated provisioning of 3rd party VPN connector
