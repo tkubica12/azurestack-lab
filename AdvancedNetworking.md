@@ -232,7 +232,7 @@ We will now create resource groups for each tier and deploy servers.
 
 ```powershell
 # Store image name as variable
-$image = "Canonical:UbuntuServer:14.04-LTS:latest"
+$image = "Canonical:UbuntuServer:16.04-LTS:16.04.20180831"
 
 # Deploy jump server with public IP
 az group create -n jump-rg -l $region
@@ -502,7 +502,7 @@ az network vnet subnet update -n db `
     --route-table db-routing
 ```
 
-How to check routing tables in Azure? VNET behaves like a router, but in fact it is fully distributed SDN system and routing is done on host node level. We can get effective routes on per-NIC basis - check it out for db-vm.
+At time of this writing Azure Stack (version 1906) does not support printing effective routes on per-NIC basis. Following command works in Azure and might be ported to Azure Stack at some point.
 
 ```powershell
 az network nic show-effective-route-table -g db-rg -n db-vmVMNic -o table
@@ -611,9 +611,122 @@ ssh azureuser@proxy-vm
     curl web-vm-01
 ```
 
-## Step XX - using Azure Stack VPN
+## Step 8 - using Azure Stack VPN
+To get private connectivity you can use Azure Stack VPN (native component) or 3rd party applicance such as Fortinet we deployed previously. To test both options we will now create VPN connection between Azure Stack VPN and Fortinet. We will create new VNET (entity completely isolated from our previous VNET) and use Azure Stack VPN on its side to connect to our first VNET with Fortigate VPN on that side.
+
+First create new VNET with test server.
+
+```powershell
+$region = "local"
+
+# Create resource group
+az group create -n newnet-rg -l $region
+
+# Create VNET with test subnet and GatewaySubnet
+az network vnet create -n newnet -g newnet-rg --address-prefix 10.1.0.0/16
+az network vnet subnet create -n test `
+    -g newnet-rg `
+    --vnet-name newnet `
+    --address-prefix 10.1.0.0/24
+az network vnet subnet create -n GatewaySubnet `
+    -g newnet-rg `
+    --vnet-name newnet `
+    --address-prefix 10.1.1.0/24
+
+# Create test vm
+$image = "Canonical:UbuntuServer:16.04-LTS:16.04.20180831"
+
+az vm create -n "test-vm" `
+    -g newnet-rg `
+    --image $image `
+    --authentication-type password `
+    --admin-username azureuser `
+    --admin-password Azure12345678 `
+    --public-ip-address '""' `
+    --nsg '""' `
+    --size Standard_DS1_v2 `
+    --vnet-name newnet `
+    --subnet test `
+    --no-wait
+```
+
+Configure Azure Stack VPN
+
+```powershell
+# Store Fortinet public IP
+$fortinetip = "1.2.3.4"
+
+# Create public IP for Azure Stack VPN
+az network public-ip create -n vpn-ip -g newnet-rg
+
+# Create VPN gateway
+az network vnet-gateway create -n vpn `
+  -l $region `
+  --public-ip-address vpn-ip `
+  -g newnet-rg `
+  --vnet newnet `
+  --gateway-type Vpn `
+  --sku Basic `
+  --vpn-type RouteBased `
+  --no-wait
+
+# Add peer configuration
+az network local-gateway create -n myFortinet `
+    --gateway-ip-address $fortinetip `
+    -g newnet-rg `
+    --local-address-prefixes 10.0.0.0/16
+
+# Add connection
+az network vpn-connection create -n toFortinet `
+    -g newnet-rg `
+    --vnet-gateway1 vpn `
+    -l $region `
+    --shared-key Azure12345678 `
+    --local-gateway2 myFortinet
+
+# Get Azure Stack VPN public IP
+az network public-ip show -n vpn-ip -g newnet-rg --query ipAddress -o tsv
+```
+
+Azure Stack VPN supports only route-based VPN type, not policy-based. Therefore we need to create virtual IPSec interface in Fortigate.
+
+In Fortinet we will use VPN -> IPSec Wizard
+* Use custom template type
+* Configure IPSec
+  * Use remote IP of Azure Stack VPN
+  * Select Port1
+  * Disable NAT Traversal
+  * Configure Dead Peer Detection On Idle
+  * Configure pre-shared key Azure12345678
+  * Use IKEv2
+  * Use Diffie-Hellman Group 2
+  * Key lifetime 28800
+  * Go to advanced settings of phase 2
+    * Disable PFS which is currently not supported in Azure Stack (it is in Azure so this might change in future)
+    * Configure key life time to Both
+      * 27000 seconds
+      * 33553408 KB
+
+Now we need to add routes in Network -> Static Routes
+* 10.1.0.0/16 -> toAzureStack (virtual IPSec interface)
+
+Add policy in Policies & Objects -> IPv4 Policy
+* From Port2 to toAzureStack
+* Source and Destination to All
+* Service SSH
+* Disable NAT
+
+You should now see tunnel up in Azure Stack portal (on Connection) and in Fortigate Monitor -> IPSec Monitor
+
+To test things out go to jump VM (note we are not able to get to remote side from it as we are not routing jump subnet via Fortigate) and connect to db-vm (which is routed via Fortigate). Try to SSH to remote site.
+
+```powershell
+ssh azureuser@db-vm
+    ssh azureuser@10.1.0.4
+```
 
 ## Step XX - automated provisioning of 3rd party VPN connector
+TBD
 
 ## Step XX - Cleanup
 
@@ -623,6 +736,7 @@ az group delete -n jump-rg --no-wait -y
 az group delete -n db-rg --no-wait -y
 az group delete -n proxy-rg --no-wait -y
 az group delete -n fortinet-rg --no-wait -y
+az group delete -n newnet-rg --no-wait -y
 
 # When VM resources are deleted, destroy network
 az group delete -n net-rg --no-wait -y 
