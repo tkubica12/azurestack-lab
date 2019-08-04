@@ -725,10 +725,7 @@ ssh azureuser@db-vm
     ssh azureuser@10.1.0.4
 ```
 
-## Step XX - automated provisioning of 3rd party VPN connector
-TBD
-
-## Step XX - Cleanup
+## Step 9 - Cleanup
 
 ```powershell
 az group delete -n web-rg --no-wait -y
