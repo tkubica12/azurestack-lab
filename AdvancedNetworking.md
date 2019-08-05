@@ -74,7 +74,6 @@ Note NSG can also be applied on individual VMs.
 
 ```powershell
 # Jump firewalling
-$subnetId = $(az network vnet subnet show -g net-rg --name jump --vnet-name net --query id -o tsv)
 az network nsg create -n jump-nsg -g net-rg
 az network nsg rule create -g net-rg `
     --nsg-name jump-nsg `
@@ -93,7 +92,6 @@ az network vnet subnet update -g net-rg `
     --network-security-group jump-nsg
 
 # Web firewalling
-$subnetId = $(az network vnet subnet show -g net-rg --name web --vnet-name net --query id -o tsv)
 az network nsg create -n web-nsg -g net-rg
 az network nsg rule create -g net-rg `
     --nsg-name web-nsg `
@@ -145,7 +143,6 @@ az network vnet subnet update -g net-rg `
     --network-security-group web-nsg
 
 # DB firewalling
-$subnetId = $(az network vnet subnet show -g net-rg --name db --vnet-name net --query id -o tsv)
 az network nsg create -n db-nsg -g net-rg
 az network nsg rule create -g net-rg `
     --nsg-name db-nsg `
@@ -186,7 +183,6 @@ az network vnet subnet update -g net-rg `
     --network-security-group db-nsg
 
 # Proxy firewalling
-$subnetId = $(az network vnet subnet show -g net-rg --name proxy --vnet-name net --query id -o tsv)
 az network nsg create -n proxy-nsg -g net-rg
 az network nsg rule create -g net-rg `
     --nsg-name proxy-nsg `
@@ -725,7 +721,165 @@ ssh azureuser@db-vm
     ssh azureuser@10.1.0.4
 ```
 
-## Step 9 - Cleanup
+
+
+## Step 9 - connecting provider virtual network with GRE
+
+As of Azure Stack 1907 native VPN service does have limitations due to ith multi-tenant implementation that might not suite well some ISP scenarios. You might have customers leveraging standard services such as bare metal service, hosting or virtualization environment and you want private connectivity between their traditional workloads and Azure Stack deployments:
+* As VPN is currently multi-tenant overall performance is shared for all Azure Stack tenants
+* Due to multi-tenant nature VPN connections cannot be estabilished to one IP more than once (so you cannot have single provider VPN endpoint for all tenants that they would use in their VPN configuration)
+* As workaround you might deploy 3rd party single-tenant VPN service, but that comes with additional challanges:
+  * Enterprise-grade solution with NGFW can get expensive especialy when advanced features such as firewalling or IPS are not required
+  * Maintaining free Linux implementation with tools like StrongSwan can be harder to manage
+  * IPSec encapsulation might not be neccessary when staying in provider network adding overhead
+
+As alternative let's explore using GRE encapsulation from tenant Linux VM to provider firewall (Fortinet in our demo, but can be different vendor). This comes with less overhead, is easier to manage and more efficient. Also can be more easily automated to custom marketplace item or automatically deployed with ARM and custom Linux script.
+
+**Note:** Azure uses NVGRE for SDN and all types of tenant GRE packets are dropped. Azure Stack uses VXLAN for SDN implementation and therefore VXLAN tenant packets are droped, but GRE not. You should then be able to use GRE between Azure Stack tenant and provider network.
+
+First deploy another VNET, Linux machine as GRE router and another machine as Azure Stack workload.
+
+```powershell
+# Select your region
+$region = "local"
+
+# Create resource group
+az group create -n gre-rg -l $region
+
+# Create networking
+az network vnet create -n gre-net -g gre-rg --address-prefix 10.2.0.0/16
+az network vnet subnet create -n servers `
+    -g gre-rg `
+    --vnet-name gre-net `
+    --address-prefix 10.2.0.0/24
+az network vnet subnet create -n gregw `
+    -g gre-rg `
+    --vnet-name gre-net `
+    --address-prefix 10.2.1.0/24
+
+# Store image name as variable
+$image = "Canonical:UbuntuServer:16.04-LTS:16.04.20180831"
+
+# Create testing VM with no public ip
+az vm create -n "gretest-vm" `
+    -g gre-rg `
+    --image $image `
+    --authentication-type password `
+    --admin-username azureuser `
+    --admin-password Azure12345678 `
+    --public-ip-address '""' `
+    --nsg '""' `
+    --size Standard_DS1_v2 `
+    --vnet-name gre-net `
+    --subnet servers `
+    --no-wait
+
+# Create VXLAN gateway VM with public ip
+az vm create -n "gregw-vm" `
+    -g gre-rg `
+    --image $image `
+    --authentication-type password `
+    --admin-username azureuser `
+    --admin-password Azure12345678 `
+    --public-ip-address "gre-ip" `
+    --nsg '""' `
+    --size Standard_DS1_v2 `
+    --vnet-name gre-net `
+    --subnet gregw `
+    --no-wait
+
+# Create routing table to network behind Fortigate and assign to servers subnet
+az network route-table create -g gre-rg -n toGre
+az network route-table route create -g net-rg `
+    --route-table-name toGre `
+    -n providerViaGre `
+    --next-hop-type VirtualAppliance `
+    --address-prefix "10.0.0.0/16" `
+    --next-hop-ip-address "10.2.1.4"
+az network vnet subnet update -n servers `
+    --vnet-name gre-net `
+    -g gre-rg `
+    --route-table toGre
+
+# Note public IP of your GRE VM
+az network public-ip show -n gre-ip -g gre-rg --query ipAddress -o tsv
+```
+
+Now we need to configure Fortigate. We will use device we have deployed already in 10.0.0.0/16 network. 
+
+First we need to create GRE interface listening on port1 with internal cross-link IP 10.100.0.5/24. Make sure to set remote-gw to public IP of your gregw. We need to use CLI for that:
+
+```
+config system gre-tunnel
+    edit "toTenant"
+        set interface "port1"
+        set local-gw 10.0.4.4
+        set remote-gw 185.138.245.43 
+    next
+end
+
+config system interface
+    edit "toTenant"
+        set ip 10.100.0.5 255.255.255.0
+        set allowaccess ping
+        set type tunnel
+        set remote-ip 10.100.0.6 255.255.255.0
+        set snmp-index 65
+        set interface "port1"
+    next
+end
+
+config firewall policy
+    edit 0
+        set srcintf "port2"
+        set dstintf "toTenant"
+            set srcaddr "all" 
+            set dstaddr "all" 
+        set action accept
+        set schedule "always"
+            set service "ALL" 
+    next
+    edit 0
+        set srcintf "toTenant"
+        set dstintf "port2"
+            set srcaddr "all" 
+            set dstaddr "all"  
+        set action accept
+        set schedule "always"
+            set service "ALL"  
+    next
+end
+
+config router static
+    edit 0
+        set device "toTenant"
+        set dst 10.2.0.0 255.255.0.0
+    next
+end
+```
+
+Connect to GRE gateway and configure GRE and routing. Make sure to change remote IP for your Fortigate public IP.
+
+```powershell
+ssh azureuser@1.2.3.4  # Use public IP of your VXLAN VM
+    sudo ufw disable
+    sudo ip tunnel add gre1 mode gre remote 185.138.245.44 local 10.2.1.4 ttl 255
+    sudo ip link set gre1 up
+    sudo ip addr add 10.100.0.6/24 dev gre1
+    sudo ip route add 10.0.0.0/16 dev gre1 via 10.100.0.5
+```
+
+Next steps - if you would leverage this technique make sure to:
+* Finetune security
+  * Do not disable ufw, rather configure it to allow what is needed
+  * Create NSGs to disable access to vxlangw from Internet and limit outbound to your Fortigate only
+  * Make sure public IP of your Fortigate in provider network used for VXLAN termination is not accessible from Internet
+* Automate
+  * Create script to automate and persist VLXAN and routing configuration with proper input parameters.
+  * Create ARM template that creates vxlangw and runs configuration script. Pass ARM parameters to your script in secure way.
+  * Create custom marketplace item based on ARM template.
+
+## Step 10 - Cleanup
 
 ```powershell
 az group delete -n web-rg --no-wait -y
