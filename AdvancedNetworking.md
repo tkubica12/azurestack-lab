@@ -888,6 +888,7 @@ az group delete -n db-rg --no-wait -y
 az group delete -n proxy-rg --no-wait -y
 az group delete -n fortinet-rg --no-wait -y
 az group delete -n newnet-rg --no-wait -y
+az group delete -n gre-rg --no-wait -y
 
 # When VM resources are deleted, destroy network
 az group delete -n net-rg --no-wait -y 
