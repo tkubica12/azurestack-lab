@@ -873,11 +873,11 @@ ssh azureuser@1.2.3.4  # Use public IP of your VXLAN VM
 Next steps - if you would leverage this technique make sure to:
 * Finetune security
   * Do not disable ufw, rather configure it to allow what is needed
-  * Create NSGs to disable access to vxlangw from Internet and limit outbound to your Fortigate only
-  * Make sure public IP of your Fortigate in provider network used for VXLAN termination is not accessible from Internet
+  * Create NSGs to disable access to gregw from Internet and limit outbound to your Fortigate only
+  * Make sure public IP of your Fortigate in provider network used for GRE termination is not accessible from Internet
 * Automate
-  * Create script to automate and persist VLXAN and routing configuration with proper input parameters.
-  * Create ARM template that creates vxlangw and runs configuration script. Pass ARM parameters to your script in secure way.
+  * Create script to automate and persist GRE and routing configuration with proper input parameters.
+  * Create ARM template that creates gregw and runs configuration script. Pass ARM parameters to your script in secure way.
   * Create custom marketplace item based on ARM template.
 
 ## Step 10 - Cleanup
