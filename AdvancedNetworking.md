@@ -863,6 +863,7 @@ Connect to GRE gateway and configure GRE and routing. Make sure to change remote
 ```powershell
 ssh azureuser@1.2.3.4  # Use public IP of your VXLAN VM
     sudo ufw disable
+    sudo sysctl -w net.ipv4.ip_forward=1
     sudo ip tunnel add gre1 mode gre remote 185.138.245.44 local 10.2.1.4 ttl 255
     sudo ip link set gre1 up
     sudo ip addr add 10.100.0.6/24 dev gre1
