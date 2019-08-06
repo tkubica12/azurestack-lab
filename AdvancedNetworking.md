@@ -861,12 +861,13 @@ end
 Connect to GRE gateway and configure GRE and routing. Make sure to change remote IP for your Fortigate public IP.
 
 ```powershell
-ssh azureuser@1.2.3.4  # Use public IP of your VXLAN VM
+ssh azureuser@1.2.3.4  # Use public IP of your GRE VM
     sudo ufw disable
     sudo sysctl -w net.ipv4.ip_forward=1
     sudo ip tunnel add gre1 mode gre remote 185.138.245.44 local 10.2.1.4 ttl 255
     sudo ip link set gre1 up
     sudo ip addr add 10.100.0.6/32 dev gre1
+    sudo ip route add 10.100.0.5/32 dev gre1
     sudo ip route add 10.0.0.0/16 dev gre1 via 10.100.0.5
 ```
 
