@@ -774,7 +774,7 @@ az vm create -n "gretest-vm" `
     --subnet servers `
     --no-wait
 
-# Create VXLAN gateway VM with public ip
+# Create GRE gateway VM with public ip
 az vm create -n "gregw-vm" `
     -g gre-rg `
     --image $image `
@@ -790,7 +790,7 @@ az vm create -n "gregw-vm" `
 
 # Create routing table to network behind Fortigate and assign to servers subnet
 az network route-table create -g gre-rg -n toGre
-az network route-table route create -g net-rg `
+az network route-table route create -g gre-rg `
     --route-table-name toGre `
     -n providerViaGre `
     --next-hop-type VirtualAppliance `
