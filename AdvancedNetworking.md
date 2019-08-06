@@ -820,10 +820,10 @@ end
 
 config system interface
     edit "toTenant"
-        set ip 10.100.0.5 255.255.255.0
+        set ip 10.100.0.5 255.255.255.255
         set allowaccess ping
         set type tunnel
-        set remote-ip 10.100.0.6 255.255.255.0
+        set remote-ip 10.100.0.6 255.255.255.255
         set snmp-index 65
         set interface "port1"
     next
@@ -866,7 +866,7 @@ ssh azureuser@1.2.3.4  # Use public IP of your VXLAN VM
     sudo sysctl -w net.ipv4.ip_forward=1
     sudo ip tunnel add gre1 mode gre remote 185.138.245.44 local 10.2.1.4 ttl 255
     sudo ip link set gre1 up
-    sudo ip addr add 10.100.0.6/24 dev gre1
+    sudo ip addr add 10.100.0.6/32 dev gre1
     sudo ip route add 10.0.0.0/16 dev gre1 via 10.100.0.5
 ```
 
