@@ -4,6 +4,8 @@ During third day we will practice:
 - Creating custom marketplace items
 - Billing
 
+**Work in progress**
+
 ## Prerequisities
 Check [README](./README.md)
 
