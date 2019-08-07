@@ -19,6 +19,8 @@ az cloud register -n AzureStack `
     --profile "2019-03-01-hybrid"
 az cloud set -n AzureStack
 az login
+
+# If you are using guest account login with command az login --tenant hostingdomain.onmicrosoft.com where you specify hosting domain in which you have been added as guest
 ```
 
 ## Step 1 - virtual networks

@@ -19,6 +19,8 @@ There are multiple ways how you can authenticate. With AAD login you will be abl
 
 You should now see your storage account in explorer.
 
+**Note:** As of version 1.9 AAD login is not supported for Azure Stack when using Guest accounts. Reason is that as opposed to Azure guest accounts cannot look for proper tokens only in their home AAD, but that process needs to be initiated via hosting domain. That is reason why we are using --tenant on az login to point to right hosting domain and the same for portal access with domain hint (portalurl/hostingdomain.onmicrosoft.com). Storage Explorer currently does not support specifying this and always go to domain based on UPN so fails for guest accounts. This is planned for fix in 1.11. As workaround use other authentication methods such as connection string, storage key or SAS token.
+
 ## Step 2 - using Blob Storage with Azure Storage Explorer
 Blob storage is object store for objects such as documents, images, video content or generic files. It is organized with containers.
 

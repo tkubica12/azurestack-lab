@@ -16,7 +16,7 @@ Follow lab using this guide. Some tasks are accomplished via GUI, some via CLI, 
 
 For your convenience there is complete set of commands available at [day1-scriptshelp.ps1](./day1-scriptshelp.ps1). This for your reference and ability to quickly recreate lab environment. Please **DO NOT use it during labs**, try work yourself and use examples to come up with right solutions.
 
-If you have been added as Guest to AAD you will need to use domain hint when bookmarking portal URL. Eg. if you are tomas@homeaad.cz being added as guest to mystack.onmicrosoft.com you will have to access portal at something like http://portal.myregion.mystack.cz/mystack.onmicrosoft.com
+If you have been added as Guest to AAD you will need to use domain hint when bookmarking portal URL. Eg. if you are tomas@homeaad.cz being added as guest to mystack.onmicrosoft.com you will have to access portal at something like https://portal.myregion.mystack.cz/mystack.onmicrosoft.com
 
 ## Step 1 - RBAC
 For purposes of this lab make sure all resource providers are registered. Go to Subscription -> yoursubscription -> Resource Providers and register all listed.
@@ -46,6 +46,8 @@ az cloud register -n AzureStack `
     --profile "2019-03-01-hybrid"
 az cloud set -n AzureStack
 az login
+# If you are using guest account login with command az login --tenant hostingdomain.onmicrosoft.com where you specify hosting domain in which you have been added as guest
+
 
 # Create subnet
 az network vnet subnet create -n domaincontroller `
