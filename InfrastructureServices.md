@@ -14,7 +14,7 @@ Check [README](./README.md)
 ## Guidelines
 Follow lab using this guide. Some tasks are accomplished via GUI, some via CLI, some with ARM templates. You will get examples of syntax so you can create commands yourself.
 
-For your convenience there is complete set of commands available at [day1-scriptshelp.ps1](./day1-scriptshelp.ps1). This for your reference and ability to quickly recreate lab environment. Please **DO NOT use it during labs**, try work yourself and use examples to come up with right solutions.
+For your convenience there is complete set of commands available at [InfrastructureServices-scriptshelp.ps1](./InfrastructureServices-scriptshelp.ps1). This for your reference and ability to quickly recreate lab environment. Please **DO NOT use it during labs**, try work yourself and use examples to come up with right solutions.
 
 If you have been added as Guest to AAD you will need to use domain hint when bookmarking portal URL. Eg. if you are tomas@homeaad.cz being added as guest to mystack.onmicrosoft.com you will have to access portal at something like https://portal.myregion.mystack.cz/mystack.onmicrosoft.com
 
