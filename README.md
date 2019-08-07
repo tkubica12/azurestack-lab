@@ -1,4 +1,7 @@
 # Azure Stack lab
+This repo contains labs for Azure Stack with main focus on tenant capabilities and features.
+
+Latest version tested: 1907
 
 ## Prerequisities
 - Each participant need to be able to log into both Azure Stack and Azure
@@ -8,7 +11,7 @@
   - [Install](https://docs.microsoft.com/en-us/azure-stack/operator/app-service-deploy-ha)
   - Scale number of dedicated worker nodes in Small tier to double amount of participants
   - Configure GitHub deployment according to [https://docs.microsoft.com/en-us/azure-stack/operator/azure-stack-app-service-configure-deployment-sources#configure-github](https://docs.microsoft.com/en-us/azure-stack/operator/azure-stack-app-service-configure-deployment-sources#configure-github)
-- For Day 3 install SQL resource provider
+- Install SQL resource provider, SQL server and add SKU
 - Download following items to marketplace:
   - Latest Windows 2016 Datacenter (PAYG)
   - Latest Ubuntu 16.04
@@ -18,12 +21,10 @@
   - Latest Kubernetes
   - Azure Monitor, Update and Configuration Management extension for Windows and Linux
   - Azure Monitor Dependency Agent extension for Windows and Linux
-  - For Day 3 download SQL images (SQL Standard 2017 on Windows)
-  - For Day 3 deploy additional components:
-    - CheckPoint and Fortigate
-    - F5
-- Each participant to have access to Azure shared subscription in one Resource Group (participantname-rg) on Contributor level
-- Unrestricted Internet access for each participant
+  - SQL images (SQL Standard 2017 on Windows)
+  - Networking appliances - lab is design for Fortinet (download image item + template item)
+- Each participant to have access to **Azure** shared subscription in one Resource Group (participantname-rg) on Contributor level (or his own subscription)
+- Unrestricted Internet access for each participant (no blocking of SSH or RDP)
 - Install tools on participant notebook:
   - Azure CLI [download](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli?view=azure-cli-latest)
   - Visual Studio Code [download](https://code.visualstudio.com/download)
@@ -32,15 +33,14 @@
   - WinSCP [download](https://winscp.net/eng/download.php)
   - PuttyGen [download](https://www.puttygen.com/)
   - Kubectl.exe [Download](https://storage.googleapis.com/kubernetes-release/release/v1.15.0/bin/windows/amd64/kubectl.exe) and place it to folder that is in your PATH
-- Additional requirements for Day 2:
-  - Service Principal account in AAD for each participant or one shared
-    - [Guide to create account](https://docs.microsoft.com/en-us/azure/active-directory/develop/howto-create-service-principal-portal#create-an-azure-active-directory-application)
-    - [Guide to generate secret for account](https://docs.microsoft.com/en-us/azure/active-directory/develop/howto-create-service-principal-portal#create-a-new-application-secret)
-- Additional requirements for Day 3:
-  - Get trial licenses from vendors of your choice (Check Point comes with 15 trial built in, F5 does not - check how it is with Fortinet)
-  - Administrator access to Azure Stack to configure SQL provider and create custom marketplace items
+  - SSH client such as Putty, SSH for Windows 10, WSL or Linux
+- Service Principal account in AAD for each participant or one shared (will be used for Kubernetes and Fortinet)
+  - [Guide to create account](https://docs.microsoft.com/en-us/azure/active-directory/develop/howto-create-service-principal-portal#create-an-azure-active-directory-application)
+  - [Guide to generate secret for account](https://docs.microsoft.com/en-us/azure/active-directory/develop/howto-create-service-principal-portal#create-a-new-application-secret)
+- Get trial licenses from vendors of your choice (Check Point comes with 15 trial built in, F5 does not - check how it is with Fortinet)
 - Make yourself familiar with [operator documentation](https://docs.microsoft.com/en-us/azure-stack/operator/) and [user documentation](https://docs.microsoft.com/en-us/azure-stack/user/)
 - Read [blog in Czech](https://www.tomaskubica.cz/tag/azurestack/)
+- For administrator labs [Operator.md](./Operator.md) you need administrator access to Azure Stack
 
 ## Labs
 We will split content into four training days:
