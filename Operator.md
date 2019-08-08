@@ -303,10 +303,15 @@ $usageData = Get-AzsSubscriberUsage -ReportedStartTime $start -ReportedEndTime $
 $usageData | convertto-json | out-file AzureStackUsage.json
 ```
 
-We can analyze this file with Power BI. Power Query to load and transform data is in powerbi/dataparsing.query and simple filtered report is in powerbi/report.pbix.
+Note usage file has some embedded JSON fields, no meter name and no resource group as separate field. You can use PowerShell to parse this (denormalize, enrich). Note I have tested script with Azure Stack 1907 and it might need to be modified as meter IDs or structure can change.
 
-![](powerbi/screen.png)
+```powershell
+# Get JSON file generated with previous command and parse it (or use AzureStackUsageSample.json as input)
+# You can export to CSV or JSON
+cd billing
+.\parse.ps1 -InFile AzureStackUsage.json -OutFile AzureStackUsageParsed.csv -FileType CSV
+```
 
-Our example is extremly simple, but Power BI is very powerful and a lot can be achieved there. If you want to go with that please concact Azure data experts. Also subscriptions are represented by ID and meters also which is not very convenient. You may build meter-to-name table and also export subscription-to-name table via API and use join queries in Power BI to get better experience.
+Parsed and denormalized data can be easily imported to PowerBI to get rich GUI and filtering experience.
 
 Also note that there are 3rd party billing solutions available that might give you exactly what you need without too much effort. Some are even integrated into Azure Stack Administration portal and even to Tenant portal, so you customers can easily access usage data in built-in portal. Good example of such solution is [Cloud Assert](https://www.cloudassert.com/Solutions/Azure-Stack/Usage-and-Billing)
