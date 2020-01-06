@@ -5,6 +5,16 @@ During first half of third day we will practice:
   - Using SQL Resource Provider (PaaS shared style)
   - Deploying SQL server from template (IaaS dedicated style)
 
+
+- [Azure Stack lab - Day 3 part 1: Data services](#azure-stack-lab---day-3-part-1-data-services)
+  - [Prerequisities](#prerequisities)
+  - [Step 1 - deploy Storage Account and connect Storage Explorer](#step-1---deploy-storage-account-and-connect-storage-explorer)
+  - [Step 2 - using Blob Storage with Azure Storage Explorer](#step-2---using-blob-storage-with-azure-storage-explorer)
+  - [Step 3 - automating blob operations with AzCopy](#step-3---automating-blob-operations-with-azcopy)
+  - [Step 4 - using Table Storage](#step-4---using-table-storage)
+  - [Step 5 - Using SQL Resource Provider (PaaS shared style)](#step-5---using-sql-resource-provider-paas-shared-style)
+  - [Step 6 - Provisioning dedicated SQL Server (IaaS dedicated style)](#step-6---provisioning-dedicated-sql-server-iaas-dedicated-style)
+
 ## Prerequisities
 Check [README](./README.md)
 

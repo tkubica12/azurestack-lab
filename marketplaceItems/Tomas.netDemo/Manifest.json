@@ -1,0 +1,40 @@
+{
+    "$schema": "https://gallery.azure.com/schemas/2014-09-01/manifest.json#",
+    "name": "netDemo",
+    "publisher": "Tomas",
+    "version": "1.0.0",
+    "displayName": "ms-resource:displayName",
+    "publisherDisplayName": "ms-resource:publisherDisplayName",
+    "publisherLegalName": "ms-resource:publisherDisplayName",
+    "summary": "ms-resource:summary",
+    "longSummary": "ms-resource:longSummary",
+    "description": "ms-resource:description",
+    "longDescription": "ms-resource:description",
+    "links": [
+        {
+            "displayName": "ms-resource:documentationLink",
+            "uri": "https://www.tomaskubica.cz"
+        }
+    ],
+    "artifacts": [
+        {
+            "name": "networking",
+            "type": "Template",
+            "path": "DeploymentTemplates\\networking.json",
+            "isDefault": true
+        }
+    ],
+    "icons": {
+        "small": "Icons\\Small.png",
+        "medium": "Icons\\Medium.png",
+        "large": "Icons\\Large.png",
+        "wide": "Icons\\Wide.png",
+        "hero": "Icons\\Hero.png"
+    },
+    "categories": [
+        "Compute"
+    ],
+    "uiDefinition": {
+        "path": "UIDefinition.json"
+    }
+}

@@ -6,6 +6,18 @@ During third day we will practice:
 
 **Work in progress**
 
+- [Azure Stack lab - Day 4: Azure Stack Operator](#azure-stack-lab---day-4-azure-stack-operator)
+  - [Prerequisities](#prerequisities)
+  - [Step XX - Connect to Azure Stack Administration via PowerShell](#step-xx---connect-to-azure-stack-administration-via-powershell)
+  - [Step XX - prepare tools for custom marketplace items](#step-xx---prepare-tools-for-custom-marketplace-items)
+  - [Step XX - custom marketplace item using VM image](#step-xx---custom-marketplace-item-using-vm-image)
+  - [Step XX - custom marketplace item using ARM template and default GUI](#step-xx---custom-marketplace-item-using-arm-template-and-default-gui)
+  - [Step XX - custom marketplace item using custom GUI components](#step-xx---custom-marketplace-item-using-custom-gui-components)
+  - [Step XX - using PowerShell to create and manage quotas, plans, offers and subscriptions](#step-xx---using-powershell-to-create-and-manage-quotas-plans-offers-and-subscriptions)
+  - [Step XX - administrative tasks in privileged endpoint](#step-xx---administrative-tasks-in-privileged-endpoint)
+  - [Step XX - billing](#step-xx---billing)
+
+
 ## Prerequisities
 Check [README](./README.md)
 

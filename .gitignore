@@ -1,3 +1,5 @@
 v1Settings.json
 v2Settings.json
 arm-solutions/IIS.zip
+demo-environment/operator-scripts/azurestack.pfx
+demo-environment/operator-scripts/azurestack-apiftpsso.pfx

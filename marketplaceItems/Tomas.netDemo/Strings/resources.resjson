@@ -1,0 +1,8 @@
+{
+  "displayName": "Base networking demo environment",
+  "publisherDisplayName": "Tomas",
+  "summary": "This is example of ARM-based marketplace item.",
+  "longSummary": "This is example of ARM-based marketplace item.",
+  "description": "<p><h1>Base networking</h1></p><p>You can use ARM templates to create custom marketplace items.</p>",
+  "documentationLink": "https://www.tomaskubica.cz"
+}

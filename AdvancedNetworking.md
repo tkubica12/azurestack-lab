@@ -6,6 +6,19 @@ During second half of third day we will practice:
   - Using Azure Stack VPN
   - Provisioning 3rd party VPN service
 
+- [Azure Stack lab - Day 3 part 2: Advanced Networking](#azure-stack-lab---day-3-part-2-advanced-networking)
+  - [Prerequisities](#prerequisities)
+  - [Step 1 - virtual networks](#step-1---virtual-networks)
+  - [Step 2 - segmentation with Network Security Groups](#step-2---segmentation-with-network-security-groups)
+  - [Step 3 - deploy servers](#step-3---deploy-servers)
+  - [Step 4 - internal load balancer](#step-4---internal-load-balancer)
+  - [Step 5 - deploy reverse proxy](#step-5---deploy-reverse-proxy)
+  - [Step 6 - deploy Fortinet inside tenant environment](#step-6---deploy-fortinet-inside-tenant-environment)
+  - [Step 7 - using Fortinet to inspect selected internal traffic](#step-7---using-fortinet-to-inspect-selected-internal-traffic)
+  - [Step 8 - using Azure Stack VPN](#step-8---using-azure-stack-vpn)
+  - [Step 9 - connecting provider virtual network with GRE](#step-9---connecting-provider-virtual-network-with-gre)
+  - [Step 10 - Cleanup](#step-10---cleanup)
+
 ## Prerequisities
 Check [README](./README.md)
 

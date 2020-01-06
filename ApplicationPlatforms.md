@@ -6,6 +6,22 @@ During second day we will practice:
 - Kubernetes basics
 - Deploying advanced AI/ML services in Kubernetes
 
+- [Azure Stack lab - Day 2: Application platforms](#azure-stack-lab---day-2-application-platforms)
+  - [Prerequisities](#prerequisities)
+  - [Step 1 - create and scale WebApp using PaaS and use Deployment Slots to manage versions](#step-1---create-and-scale-webapp-using-paas-and-use-deployment-slots-to-manage-versions)
+  - [Step 2 - use developer tooling to integrate Azure Stack with your development environment or CI/CD pipeline](#step-2---use-developer-tooling-to-integrate-azure-stack-with-your-development-environment-or-cicd-pipeline)
+  - [Step 3 - enable application monitoring with Application Insights in Azure](#step-3---enable-application-monitoring-with-application-insights-in-azure)
+  - [Step 4 - use serverless to expose API endpoint and store messages in Queue](#step-4---use-serverless-to-expose-api-endpoint-and-store-messages-in-queue)
+  - [Step 5 - use serverless to react on message in Queue and create file in Blob storage](#step-5---use-serverless-to-react-on-message-in-queue-and-create-file-in-blob-storage)
+  - [Step 6 - create Kubernetes cluster and connect](#step-6---create-kubernetes-cluster-and-connect)
+  - [Step 7 - create your first Pod](#step-7---create-your-first-pod)
+  - [Step 8 - using Deployment controller](#step-8---using-deployment-controller)
+  - [Step 9 - expose application via Service](#step-9---expose-application-via-service)
+  - [Step 10 - rolling upgrade](#step-10---rolling-upgrade)
+  - [Step 11 - Using MS SQL in Linux-based Docker container in Kubernetes](#step-11---using-ms-sql-in-linux-based-docker-container-in-kubernetes)
+  - [Step 12 - deploy Azure cognitive services in Kubernetes in Azure Stack](#step-12---deploy-azure-cognitive-services-in-kubernetes-in-azure-stack)
+  - [Step 13 - Use Azure Container Registry to store and build images](#step-13---use-azure-container-registry-to-store-and-build-images)
+
 ## Prerequisities
 Check [README](./README.md)
 

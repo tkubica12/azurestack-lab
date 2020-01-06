@@ -8,6 +8,27 @@ During first day we will practice:
 - Using Azure Monitor to monitor Azure Stack
 - Automating everything with ARM templates
 
+
+- [Azure Stack lab - Day 1: Infrastructure services](#azure-stack-lab---day-1-infrastructure-services)
+  - [Prerequisities](#prerequisities)
+  - [Guidelines](#guidelines)
+  - [Step 1 - RBAC](#step-1---rbac)
+  - [Step 2 - basic networking](#step-2---basic-networking)
+  - [Step 3 - jump VM](#step-3---jump-vm)
+  - [Step 4 - create domain controller VM and install domain](#step-4---create-domain-controller-vm-and-install-domain)
+  - [Step 5 - prepare image for backend](#step-5---prepare-image-for-backend)
+  - [Step 6 - create app-01-vm virtual machine](#step-6---create-app-01-vm-virtual-machine)
+  - [Step 7 - create app-02-vm and automatically join it to domain](#step-7---create-app-02-vm-and-automatically-join-it-to-domain)
+  - [Step 8 - Linux-based balanced web farm using Virtual Machine Scale Set](#step-8---linux-based-balanced-web-farm-using-virtual-machine-scale-set)
+  - [Step 9 - monitor using Azure services](#step-9---monitor-using-azure-services)
+  - [Step 10 - automate networking environment using basic ARM template](#step-10---automate-networking-environment-using-basic-arm-template)
+  - [Step 11 - automate jump server creation with ARM template](#step-11---automate-jump-server-creation-with-arm-template)
+  - [Step 12 - automate creation of multiple app servers in Availability Set and internal load balancer with ARM template](#step-12---automate-creation-of-multiple-app-servers-in-availability-set-and-internal-load-balancer-with-arm-template)
+  - [Step 13 - automate creation of web farm with VMSS, Load Balancer and OS provisioning with PowerShell DSC](#step-13---automate-creation-of-web-farm-with-vmss-load-balancer-and-os-provisioning-with-powershell-dsc)
+  - [Step 14 - put everything together with master template](#step-14---put-everything-together-with-master-template)
+  - [Step 15 - securing secrets with Azure Key Vault](#step-15---securing-secrets-with-azure-key-vault)
+  - [Step 16 - cleanup all resources](#step-16---cleanup-all-resources)
+
 ## Prerequisities
 Check [README](./README.md)
 
