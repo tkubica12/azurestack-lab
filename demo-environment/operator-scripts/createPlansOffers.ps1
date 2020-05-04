@@ -149,4 +149,17 @@ New-AzsOffer -Name "demo-offer" `
     $(Get-AzsPlan -Name "p-cores-10" -ResourceGroupName portfolio).Id, `
     $(Get-AzsPlan -Name "p-disks-5TB" -ResourceGroupName portfolio).Id, `
     $(Get-AzsPlan -Name "p-storage-1TB" -ResourceGroupName portfolio).Id, `
-    $(Get-AzsPlan -Name "p-net-5ip" -ResourceGroupName portfolio).Id
+    $(Get-AzsPlan -Name "p-net-5ip" -ResourceGroupName portfolio).Id `
+    $(Get-AzsPlan -Name "p-appservice-basic" -ResourceGroupName portfolio).Id
+
+# Create standard training offer
+New-AzsOffer -Name "training-offer" `
+    -DisplayName "training-offer" `
+    -ResourceGroupName portfolio `
+    -State Private  `
+    -BasePlanIds $(Get-AzsPlan -Name "p-base" -ResourceGroupName portfolio).Id, `
+    $(Get-AzsPlan -Name "p-cores-10" -ResourceGroupName portfolio).Id, `
+    $(Get-AzsPlan -Name "p-disks-5TB" -ResourceGroupName portfolio).Id, `
+    $(Get-AzsPlan -Name "p-storage-1TB" -ResourceGroupName portfolio).Id, `
+    $(Get-AzsPlan -Name "p-net-1ip" -ResourceGroupName portfolio).Id `
+    $(Get-AzsPlan -Name "p-appservice-basic" -ResourceGroupName portfolio).Id
