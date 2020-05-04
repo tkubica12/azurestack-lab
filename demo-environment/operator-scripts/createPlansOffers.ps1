@@ -1,5 +1,5 @@
 # Set your region name
-$region = "yourregionname"
+$region = "prghub"
 
 # We will store quotas, plans and offers in single Resource Group
 New-AzureRMResourceGroup -Location $region -Name portfolio
