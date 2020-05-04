@@ -43,3 +43,25 @@ sudo iptables -t nat -A POSTROUTING -p tcp --destination 10.1.1.100 --dport 3389
 sudo /etc/init.d/netfilter-persistent save
 
 # Configure AD
+install-windowsfeature AD-Domain-Services -IncludeManagementTools  
+Install-ADDSForest `
+    -CreateDnsDelegation:$false `
+    -DatabasePath "C:\Windows\NTDS" `
+    -DomainMode "Win2012R2" `
+    -DomainName "azurepraha.com" `
+    -DomainNetbiosName "AZUREPRAHA" `
+    -ForestMode "Win2012R2" `
+    -InstallDns:$true `
+    -LogPath "C:\Windows\NTDS" `
+    -NoRebootOnCompletion:$false `
+    -SysvolPath "C:\Windows\SYSVOL" `
+    -Force:$true
+
+$password = ""
+New-ADGroup -Name "stackusers" -GroupCategory Security -GroupScope Global
+New-ADUser -Name "user1" `
+ -SamAccountName  "user1" `
+ -AccountPassword (ConvertTo-SecureString $password -AsPlainText -force) `
+ -Enabled $true `
+ -PasswordNeverExpires  $true
+Add-ADGroupMember -Identity stackusers -Members user1
