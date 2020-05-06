@@ -14,22 +14,28 @@ az account set -s "demo"
 $region = "prghub" 
 $password = ""
 $workspaceKey = ""
+$arcSecret = ""
 
 # Deploy networking
 az group create -n networking-rg -l $region
 az group deployment create -g networking-rg --template-file stack-networking.json
 
+# Prepare Arc resource group
+az group create -n arc-azurestack-rg -l $region
+
 # Deploy Linux router VM
 az group create -n router-rg -l $region
 az group deployment create -g router-rg --template-file stack-router.json `
     --parameters adminPassword=$password `
-    --parameters workspaceKey=$workspaceKey
+    --parameters workspaceKey=$workspaceKey `
+    --parameters arcSecret=$arcSecret
 
 # Deploy Active Directory VM
 az group create -n ad-rg -l $region
 az group deployment create -g ad-rg --template-file stack-ad.json `
     --parameters adminPassword=$password `
-    --parameters workspaceKey=$workspaceKey
+    --parameters workspaceKey=$workspaceKey `
+    --parameters arcSecret=$arcSecret
 
 # Configure router
 ssh stackuser@$routerIp
