@@ -71,3 +71,10 @@ New-ADUser -Name "user1" `
  -Enabled $true `
  -PasswordNeverExpires  $true
 Add-ADGroupMember -Identity stackusers -Members user1
+
+# Deploy apps
+az group create -n windows-web-rg -l $region
+az group deployment create -g windows-web-rg --template-file stack-windows-web.json `
+    --parameters adminPassword=$password `
+    --parameters workspaceKey=$workspaceKey `
+    --parameters arcSecret=$arcSecret

@@ -13,6 +13,12 @@
             "metadata": {
                 "description": "Azure Monitor workspace key"
             }
+        },
+        "arcSecret": {
+            "type": "securestring",
+            "metadata": {
+                "description": "Secret of service principal to onboard to Arc"
+            }
         }
     },
     "variables": {
@@ -123,6 +129,28 @@
                         },
                         "protectedSettings": {
                             "workspaceKey": "[parameters('workspaceKey')]"
+                        }
+                    }
+                },
+                {
+                    "name": "[concat(variables('vmName'), '/registerArc')]",
+                    "type": "Microsoft.Compute/virtualMachines/extensions",
+                    "apiVersion": "2015-06-15",
+                    "dependsOn": [
+                        "[variables('vmName')]"
+                    ],
+                    "properties": {
+                        "publisher": "Microsoft.Compute",
+                        "type": "CustomScriptExtension",
+                        "typeHandlerVersion": "1.9",
+                        "autoUpgradeMinorVersion": true,
+                        "settings": {
+                            "fileUris": [
+                                "https://raw.githubusercontent.com/tkubica12/azurestack-lab/master/demo-environment/arm/scripts/arcInstallWindows.ps1"
+                            ]
+                        },
+                        "protectedSettings": {
+                            "commandToExecute": "[concat('powershell -ExecutionPolicy Unrestricted -File arcInstallWindows.ps1 ', parameters('arcSecret'))]"
                         }
                     }
                 }
