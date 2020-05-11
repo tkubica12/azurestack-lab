@@ -1,6 +1,6 @@
 configuration IIS
 {
-    Import-DscResource -Name MSFT_xRemoteFile -ModuleName xPSDesiredStateConfiguration
+    Import-DscResource -Name xRemoteFile -ModuleName xPSDesiredStateConfiguration
     node "localhost"
     {
         WindowsFeature IIS {
