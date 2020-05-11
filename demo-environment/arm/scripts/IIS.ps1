@@ -1,5 +1,6 @@
 configuration IIS
 {
+    Import-DscResource -Name MSFT_xRemoteFile -ModuleName xPSDesiredStateConfiguration
     node "localhost"
     {
         WindowsFeature IIS {
@@ -12,10 +13,10 @@ configuration IIS
             Name   = "Web-Asp-Net45"
         } 
 
-        File WebsiteContent {
-            Ensure = 'Present'
-            SourcePath = '$PSScriptRoot\info.aspx'
+        xRemoteFile DownloadFile
+        {
             DestinationPath = 'c:\inetpub\wwwroot'
+            Uri = "https://raw.githubusercontent.com/tkubica12/azurestack-lab/master/demo-environment/arm/scripts/info.aspx"
         }
     }
 }
