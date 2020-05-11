@@ -14,7 +14,7 @@ configuration IIS
 
         File WebsiteContent {
             Ensure = 'Present'
-            SourcePath = 'info.aspx'
+            SourcePath = '.\info.aspx'
             DestinationPath = 'c:\inetpub\wwwroot'
         }
     }
