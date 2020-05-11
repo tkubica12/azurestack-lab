@@ -23,7 +23,7 @@
         },
         "name": {
             "type": "string",
-            "defaultValue": "web-windows",
+            "defaultValue": "web-win",
             "metadata": {
                 "description": "App name"
             }
@@ -42,10 +42,10 @@
         "vnetResourceGroupName": "networking-rg",
         "vnetName": "demo-net",
         "subnetName": "apps-subnet",
-        "dscUrl": "",
+        "dscUrl": "https://github.com/tkubica12/azurestack-lab/blob/master/demo-environment/arm/scripts/IIS.zip?raw=true",
         "vmSize": "Standard_F2s",
         "count": 2,
-        "windowsOSVersion": "2016-Datacenter",
+        "imageSku": "2016-Datacenter",
         "imagePublisher": "MicrosoftWindowsServer",
         "imageOffer": "WindowsServer",
         "vmssName": "[concat(parameters('name'), '-vmss')]",
@@ -64,7 +64,10 @@
                         "name": "frontend",
                         "properties": {
                             "privateIPAllocationMethod": "static",
-                            "privateIPAddress": "[parameters('lbIp')]"
+                            "privateIPAddress": "[parameters('lbIp')]",
+                            "subnet": {
+                                "id": "[variables('subnetId')]"
+                            }
                         }
                     }
                 ],
@@ -132,12 +135,12 @@
                         "imageReference": {
                             "publisher": "[variables('imagePublisher')]",
                             "offer": "[variables('imageOffer')]",
-                            "sku": "[variables('windowsOSVersion')]",
+                            "sku": "[variables('imageSku')]",
                             "version": "latest"
                         }
                     },
                     "osProfile": {
-                        "computerNamePrefix": "[variables('vmssName')]",
+                        "computerNamePrefix": "[parameters('name')]",
                         "adminUsername": "[variables('adminUsername')]",
                         "adminPassword": "[parameters('adminPassword')]"
                     },
@@ -147,9 +150,11 @@
                                 "name": "nic",
                                 "properties": {
                                     "primary": "true",
-                                    "dnsSettings": [
-                                        "10.1.1.100"
-                                    ],
+                                    "dnsSettings": {
+                                        "dnsServers": [
+                                            "10.1.1.100"
+                                        ]
+                                    },
                                     "ipConfigurations": [
                                         {
                                             "name": "ipconfig",

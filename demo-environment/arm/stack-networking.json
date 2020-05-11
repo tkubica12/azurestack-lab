@@ -49,6 +49,19 @@
                             "priority": 115,
                             "direction": "Inbound"
                         }
+                    },
+                    {
+                        "name": "AllowHTTP",
+                        "properties": {
+                            "protocol": "*",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "80",
+                            "sourceAddressPrefix": "*",
+                            "destinationAddressPrefix": "*",
+                            "access": "Allow",
+                            "priority": 120,
+                            "direction": "Inbound"
+                        }
                     }
                 ]
             }
