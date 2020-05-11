@@ -14,7 +14,7 @@ configuration IIS
 
         File WebsiteContent {
             Ensure = 'Present'
-            SourcePath = 'https://raw.githubusercontent.com/tkubica12/azurestack-lab/master/demo-environment/arm/scripts/info.aspx'
+            SourcePath = '$PSScriptRoot\info.aspx'
             DestinationPath = 'c:\inetpub\wwwroot'
         }
     }
