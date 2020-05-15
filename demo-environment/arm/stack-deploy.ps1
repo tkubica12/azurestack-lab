@@ -97,3 +97,9 @@ az group deployment create -g windows-web-rg --template-file stack-windows-web.j
     --parameters adminPassword=$password `
     --parameters workspaceKey=$workspaceKey `
     --parameters arcSecret=$arcSecret
+
+az group create -n sql-web-rg -l $region
+az group deployment create -g sql-web-rg --template-file stack-sql-web.json `
+    --parameters adminPassword=$password `
+    --parameters workspaceKey=$workspaceKey `
+    --parameters arcSecret=$arcSecret

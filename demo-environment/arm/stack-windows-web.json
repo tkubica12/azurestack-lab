@@ -34,6 +34,13 @@
             "metadata": {
                 "description": "Static private LB address"
             }
+        },
+        "subnetName": {
+            "type": "string",
+            "defaultValue": "apps-subnet",
+            "metadata": {
+                "description": "Subnet name"
+            }
         }
     },
     "variables": {
@@ -43,16 +50,15 @@
         "workspaceId": "cf54e67f-43cf-43fa-b1b0-3d047a9dbf1c",
         "vnetResourceGroupName": "networking-rg",
         "vnetName": "demo-net",
-        "subnetName": "apps-subnet",
         "dscUrl": "https://github.com/tkubica12/azurestack-lab/blob/master/demo-environment/arm/scripts/IIS.zip?raw=true",
         "vmSize": "Standard_F2s",
-        "count": 1,
+        "count": 2,
         "imageSku": "2019-Datacenter",
         "imagePublisher": "MicrosoftWindowsServer",
         "imageOffer": "WindowsServer",
         "vmssName": "[concat(parameters('name'), '-vmss')]",
         "lbName": "[concat(parameters('name'), '-lb-ip')]",
-        "subnetId": "[resourceId(variables('vnetResourceGroupName'), 'Microsoft.Network/virtualNetworks/subnets', variables('vnetName'), variables('subnetName'))]"
+        "subnetId": "[resourceId(variables('vnetResourceGroupName'), 'Microsoft.Network/virtualNetworks/subnets', variables('vnetName'), parameters('subnetName'))]"
     },
     "resources": [
         {

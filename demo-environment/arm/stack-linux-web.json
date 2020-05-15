@@ -1,0 +1,236 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json",
+    "contentVersion": "1.0.0.0",
+    "apiProfile": "2018-03-01-hybrid",
+    "parameters": {
+        "adminPassword": {
+            "type": "securestring",
+            "metadata": {
+                "description": "The password for the Administrator account of the new VMs. Default value is subscription id"
+            }
+        },
+        "workspaceKey": {
+            "type": "securestring",
+            "metadata": {
+                "description": "Azure Monitor workspace key"
+            }
+        },
+        "arcSecret": {
+            "type": "securestring",
+            "metadata": {
+                "description": "Secret of service principal to onboard to Arc"
+            }
+        },
+        "name": {
+            "type": "string",
+            "defaultValue": "web-lin",
+            "metadata": {
+                "description": "App name"
+            }
+        },
+        "lbIp": {
+            "type": "string",
+            "defaultValue": "10.1.2.200",
+            "metadata": {
+                "description": "Static private LB address"
+            }
+        },
+        "subnetName": {
+            "type": "string",
+            "defaultValue": "apps-subnet",
+            "metadata": {
+                "description": "Subnet name"
+            }
+        }
+    },
+    "variables": {
+        "adminUsername": "stackuser",
+        "workspaceId": "cf54e67f-43cf-43fa-b1b0-3d047a9dbf1c",
+        "vnetResourceGroupName": "networking-rg",
+        "vnetName": "demo-net",
+        "dscUrl": "https://github.com/tkubica12/azurestack-lab/blob/master/demo-environment/arm/scripts/IIS.zip?raw=true",
+        "vmSize": "Standard_F2s",
+        "count": 2,
+        "imageSku": "18.04-LTS",
+        "imagePublisher": "Canonical",
+        "imageOffer": "UbuntuServer",
+        "vmssName": "[concat(parameters('name'), '-vmss')]",
+        "lbName": "[concat(parameters('name'), '-lb-ip')]",
+        "subnetId": "[resourceId(variables('vnetResourceGroupName'), 'Microsoft.Network/virtualNetworks/subnets', variables('vnetName'), parameters('subnetName'))]"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Network/loadBalancers",
+            "name": "[variables('lbName')]",
+            "apiVersion": "2017-10-01",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "frontendIPConfigurations": [
+                    {
+                        "name": "frontend",
+                        "properties": {
+                            "privateIPAllocationMethod": "static",
+                            "privateIPAddress": "[parameters('lbIp')]",
+                            "subnet": {
+                                "id": "[variables('subnetId')]"
+                            }
+                        }
+                    }
+                ],
+                "backendAddressPools": [
+                    {
+                        "name": "LoadBalancerBackend"
+                    }
+                ],
+                "loadBalancingRules": [
+                    {
+                        "name": "lbrule",
+                        "properties": {
+                            "frontendIPConfiguration": {
+                                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('lbName')), '/frontendIpConfigurations/frontend')]"
+                            },
+                            "backendAddressPool": {
+                                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('lbName')), '/backendAddressPools/loadBalancerBackEnd')]"
+                            },
+                            "probe": {
+                                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('lbName')), '/probes/lbprobe')]"
+                            },
+                            "protocol": "tcp",
+                            "frontendPort": 80,
+                            "backendPort": 80,
+                            "idleTimeoutInMinutes": 5
+                        }
+                    }
+                ],
+                "probes": [
+                    {
+                        "name": "lbprobe",
+                        "properties": {
+                            "protocol": "tcp",
+                            "port": 80,
+                            "intervalInSeconds": "5",
+                            "numberOfProbes": "2"
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "type": "Microsoft.Compute/virtualMachineScaleSets",
+            "name": "[variables('vmssName')]",
+            "apiVersion": "2017-12-01",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/loadBalancers', variables('lbName'))]"
+            ],
+            "sku": {
+                "name": "[variables('vmSize')]",
+                "tier": "Standard",
+                "capacity": "[variables('count')]"
+            },
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "upgradePolicy": {
+                    "mode": "Manual"
+                },
+                "virtualMachineProfile": {
+                    "storageProfile": {
+                        "osDisk": {
+                            "caching": "ReadOnly",
+                            "createOption": "FromImage"
+                        },
+                        "imageReference": {
+                            "publisher": "[variables('imagePublisher')]",
+                            "offer": "[variables('imageOffer')]",
+                            "sku": "[variables('imageSku')]",
+                            "version": "latest"
+                        }
+                    },
+                    "osProfile": {
+                        "computerNamePrefix": "[parameters('name')]",
+                        "adminUsername": "[variables('adminUsername')]",
+                        "adminPassword": "[parameters('adminPassword')]"
+                    },
+                    "networkProfile": {
+                        "networkInterfaceConfigurations": [
+                            {
+                                "name": "nic",
+                                "properties": {
+                                    "primary": "true",
+                                    "dnsSettings": {
+                                        "dnsServers": [
+                                            "10.1.1.100"
+                                        ]
+                                    },
+                                    "ipConfigurations": [
+                                        {
+                                            "name": "ipconfig",
+                                            "properties": {
+                                                "subnet": {
+                                                    "id": "[variables('subnetId')]"
+                                                },
+                                                "loadBalancerBackendAddressPools": [
+                                                    {
+                                                        "id": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', variables('lbName'), 'LoadBalancerBackend')]"
+                                                    }
+                                                ]
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        ]
+                    },
+                    "extensionProfile": {
+                        "extensions": [
+                            {
+                                "type": "Microsoft.Compute/virtualMachines/extensions",
+                                "name": "registerArc",
+                                "properties": {
+                                    "publisher": "Microsoft.Azure.Extensions",
+                                    "type": "CustomScript",
+                                    "typeHandlerVersion": "2.0",
+                                    "autoUpgradeMinorVersion": true,
+                                    "settings": {
+                                    },
+                                    "protectedSettings": {
+                                        "commandToExecute": "[concat('bash arcInstallLinux.sh ', parameters('arcSecret'))]",
+                                        "fileUris": [
+                                            "https://raw.githubusercontent.com/tkubica12/azurestack-lab/master/demo-environment/arm/scripts/arcInstallLinux.sh"
+                                        ]
+                                    }
+                                }
+                            },
+                            {
+                                "name": "DependencyAgent",
+                                "type": "Microsoft.Compute/virtualMachines/extensions",
+                                "properties": {
+                                    "autoUpgradeMinorVersion": true,
+                                    "publisher": "Microsoft.Azure.Monitoring.DependencyAgent",
+                                    "type": "DependencyAgentLinux",
+                                    "typeHandlerVersion": "9.10"
+                                }
+                            },
+                            {
+                                "name": "Microsoft.EnterpriseCloud.Monitoring",
+                                "type": "Microsoft.Compute/virtualMachines/extensions",
+                                "properties": {
+                                    "autoUpgradeMinorVersion": true,
+                                    "provisioningState": "Succeeded",
+                                    "publisher": "Microsoft.EnterpriseCloud.Monitoring",
+                                    "type": "OmsAgentForLinux",
+                                    "typeHandlerVersion": "1.12",
+                                    "settings": {
+                                        "workspaceId": "[variables('workspaceId')]"
+                                    },
+                                    "protectedSettings": {
+                                        "workspaceKey": "[parameters('workspaceKey')]"
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        }
+    ]
+}

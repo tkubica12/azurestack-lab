@@ -121,7 +121,6 @@
                     ],
                     "properties": {
                         "autoUpgradeMinorVersion": true,
-                        "provisioningState": "Creating",
                         "publisher": "Microsoft.Azure.Monitoring.DependencyAgent",
                         "type": "DependencyAgentLinux",
                         "typeHandlerVersion": "9.10"

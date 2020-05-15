@@ -1,0 +1,272 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "sqlIp": {
+            "type": "string",
+            "defaultValue": "10.1.2.250",
+            "metadata": {
+                "description": "Static private LB address"
+            }
+        },
+        "subnetName": {
+            "type": "string",
+            "defaultValue": "apps-subnet",
+            "metadata": {
+                "description": "Subnet name"
+            }
+        },
+        "name": {
+            "type": "string",
+            "defaultValue": "sql",
+            "metadata": {
+                "description": "SQL name"
+            }
+        },
+        "adminPassword": {
+            "type": "securestring",
+            "metadata": {
+                "description": "The password for the Administrator account of the new VMs. Default value is subscription id"
+            }
+        },
+        "workspaceKey": {
+            "type": "securestring",
+            "metadata": {
+                "description": "Azure Monitor workspace key"
+            }
+        },
+        "arcSecret": {
+            "type": "securestring",
+            "metadata": {
+                "description": "Secret of service principal to onboard to Arc"
+            }
+        }
+    },
+    "variables": {
+        "adminUsername": "stackuser",
+        "workspaceId": "cf54e67f-43cf-43fa-b1b0-3d047a9dbf1c",
+        "vnetResourceGroupName": "networking-rg",
+        "vnetName": "demo-net",
+        "vmSize": "Standard_DS2_v2",
+        "vmName": "[concat(parameters('name'), '-vm')]",
+        "backupStorageName": "[concat(parameters('name'), 'backupstorage')]",
+        "nicName": "[concat(parameters('name'), '-nic')]",
+        "subnetId": "[resourceId(variables('vnetResourceGroupName'), 'Microsoft.Network/virtualNetworks/subnets', variables('vnetName'), parameters('subnetName'))]"
+    },
+    "resources": [
+        {
+            "name": "[variables('vmName')]",
+            "type": "Microsoft.Compute/virtualMachines",
+            "apiVersion": "2017-03-30",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "[concat('Microsoft.Network/networkInterfaces/', variables('nicName'))]"
+            ],
+            "properties": {
+                "osProfile": {
+                    "computerName": "[variables('vmName')]",
+                    "adminUsername": "[variables('adminUsername')]",
+                    "adminPassword": "[parameters('adminPassword')]",
+                    "windowsConfiguration": {
+                        "provisionVmAgent": "true"
+                    }
+                },
+                "hardwareProfile": {
+                    "vmSize": "[variables('vmSize')]"
+                },
+                "storageProfile": {
+                    "imageReference": {
+                        "publisher": "MicrosoftSQLServer",
+                        "offer": "SQL2017-WS2016",
+                        "sku": "Enterprise",
+                        "version": "latest"
+                    },
+                    "osDisk": {
+                        "createOption": "fromImage",
+                        "managedDisk": {
+                            "storageAccountType": "Standard_LRS"
+                        }
+                    },
+                    "dataDisks": [
+                        {
+                            "createOption": "empty",
+                            "lun": 0,
+                            "diskSizeGB": "1023",
+                            "caching": "ReadOnly",
+                            "managedDisk": {
+                                "storageAccountType": "Standard_LRS"
+                            }
+                        }
+                    ]
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('nicName'))]"
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "apiVersion": "2015-06-15",
+            "type": "Microsoft.Compute/virtualMachines/extensions",
+            "name": "[concat(variables('vmName'), '/SqlIaasExtension')]",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "[concat('Microsoft.Compute/virtualMachines/', variables('vmName'))]"
+            ],
+            "properties": {
+                "type": "SqlIaaSAgent",
+                "publisher": "Microsoft.SqlServer.Management",
+                "typeHandlerVersion": "1.2",
+                "autoUpgradeMinorVersion": "true",
+                "settings": {
+                    "AutoTelemetrySettings": {
+                        "Region": "[resourceGroup().location]"
+                    },
+                    "AutoPatchingSettings": {
+                        "PatchCategory": "WindowsMandatoryUpdates",
+                        "Enable": true,
+                        "DayOfWeek": "Sunday",
+                        "MaintenanceWindowStartingHour": "2",
+                        "MaintenanceWindowDuration": "60"
+                    },
+                    "AutoBackupSettings": {
+                        "Enable": true,
+                        "RetentionPeriod": "30",
+                        "EnableEncryption": false,
+                        "BackupSystemDbs": false,
+                        "BackupScheduleType": "Automated"
+                    },
+                    "KeyVaultCredentialSettings": {
+                        "Enable": false,
+                        "CredentialName": ""
+                    },
+                    "ServerConfigurationsManagementSettings": {
+                        "SQLConnectivityUpdateSettings": {
+                            "ConnectivityType": "Private",
+                            "Port": "1433"
+                        },
+                        "SQLWorkloadTypeUpdateSettings": {
+                            "SQLWorkloadType": "GENERAL"
+                        },
+                        "SQLStorageUpdateSettings": {
+                            "DiskCount": "1",
+                            "NumberOfColumns": "1",
+                            "StartingDeviceID": "2",
+                            "DiskConfigurationType": "NEW"
+                        },
+                        "AdditionalFeaturesServerConfigurations": {
+                            "IsRServicesEnabled": "false"
+                        }
+                    }
+                },
+                "protectedSettings": {
+                    "StorageUrl": "[reference(resourceId('Microsoft.Storage/storageAccounts', variables('backupStorageName')), '2017-10-01').primaryEndpoints['blob']]",
+                    "StorageAccessKey": "[first(listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('backupStorageName')), '2017-10-01').keys).value]",
+                    "SQLAuthUpdateUserName": "[variables('adminUsername')]",
+                    "SQLAuthUpdatePassword": "[parameters('adminPassword')]"
+                }
+            }
+        },
+        {
+            "apiVersion": "2015-06-15",
+            "type": "Microsoft.Compute/virtualMachines/extensions",
+            "name": "[concat(variables('vmName'), '/Microsoft.EnterpriseCloud.Monitoring')]",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "[concat('Microsoft.Compute/virtualMachines/', variables('vmName'))]"
+            ],
+            "properties": {
+                "autoUpgradeMinorVersion": true,
+                "provisioningState": "Succeeded",
+                "publisher": "Microsoft.EnterpriseCloud.Monitoring",
+                "type": "MicrosoftMonitoringAgent",
+                "typeHandlerVersion": "1.0",
+                "settings": {
+                    "workspaceId": "[variables('workspaceId')]"
+                },
+                "protectedSettings": {
+                    "workspaceKey": "[parameters('workspaceKey')]"
+                }
+            }
+        },
+        {
+            "apiVersion": "2015-06-15",
+            "type": "Microsoft.Compute/virtualMachines/extensions",
+            "name": "[concat(variables('vmName'), '/DependencyAgent')]",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "[concat('Microsoft.Compute/virtualMachines/', variables('vmName'))]"
+            ],
+            "properties": {
+                "autoUpgradeMinorVersion": true,
+                "provisioningState": "Creating",
+                "publisher": "Microsoft.Azure.Monitoring.DependencyAgent",
+                "type": "DependencyAgentWindows",
+                "typeHandlerVersion": "9.10"
+            }
+        },
+        {
+            "apiVersion": "2015-06-15",
+            "type": "Microsoft.Compute/virtualMachines/extensions",
+            "name": "[concat(variables('vmName'), '/registerArc')]",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "[concat('Microsoft.Compute/virtualMachines/', variables('vmName'))]"
+            ],
+            "properties": {
+                "publisher": "Microsoft.Compute",
+                "type": "CustomScriptExtension",
+                "typeHandlerVersion": "1.9",
+                "autoUpgradeMinorVersion": true,
+                "settings": {
+                    "fileUris": [
+                        "https://raw.githubusercontent.com/tkubica12/azurestack-lab/master/demo-environment/arm/scripts/arcInstallWindows.ps1"
+                    ]
+                },
+                "protectedSettings": {
+                    "commandToExecute": "[concat('powershell -ExecutionPolicy Unrestricted -File arcInstallWindows.ps1 ', parameters('arcSecret'))]"
+                }
+            }
+        },
+        {
+            "name": "[variables('nicName')]",
+            "type": "Microsoft.Network/networkInterfaces",
+            "apiVersion": "2017-10-01",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "dnsSettings": {
+                    "dnsServers": [
+                        "10.1.1.100"
+                    ]
+                },
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig1",
+                        "properties": {
+                            "subnet": {
+                                "id": "[variables('subnetId')]"
+                            },
+                            "privateIPAllocationMethod": "Static",
+                            "privateIPAddress": "[parameters('sqlIp')]"
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "name": "[variables('backupStorageName')]",
+            "type": "Microsoft.Storage/storageAccounts",
+            "apiVersion": "2017-10-01",
+            "location": "[resourceGroup().location]",
+            "properties": {
+            },
+            "sku": {
+                "name": "Standard_LRS"
+            },
+            "kind": "Storage"
+        }
+    ]
+}
