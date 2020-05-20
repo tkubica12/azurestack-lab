@@ -95,5 +95,5 @@ Also check monitoring in Azure works.
 Destroy demo environment.
 
 ```powershell
-az group delete -n armdemo-web-rg -l $region
+az group delete -n armdemo-web-rg -y
 ```
