@@ -48,10 +48,12 @@ sudo sysctl -p
 sudo iptables -t nat -F
 sudo iptables -t nat -A PREROUTING -p tcp --dport 9001 -j DNAT --to-destination 10.1.1.100:3389 # AD RDP
 sudo iptables -t nat -A POSTROUTING -p tcp --destination 10.1.1.100 --dport 3389 -j MASQUERADE # AD RDP
-sudo iptables -t nat -A PREROUTING -p tcp --dport 9002 -j DNAT --to-destination 10.1.2.100:80 # AD web-win
-sudo iptables -t nat -A POSTROUTING -p tcp --destination 10.1.2.100 --dport 80 -j MASQUERADE # AD web-win
-sudo iptables -t nat -A PREROUTING -p tcp --dport 9003 -j DNAT --to-destination 10.1.2.200:80 # AD lin-win
-sudo iptables -t nat -A POSTROUTING -p tcp --destination 10.1.2.200 --dport 80 -j MASQUERADE # AD lin-win
+sudo iptables -t nat -A PREROUTING -p tcp --dport 9002 -j DNAT --to-destination 10.1.2.100:80 # web-win lb
+sudo iptables -t nat -A POSTROUTING -p tcp --destination 10.1.2.100 --dport 80 -j MASQUERADE # web-win lb
+sudo iptables -t nat -A PREROUTING -p tcp --dport 9003 -j DNAT --to-destination 10.1.2.200:80 # web-linux  lb
+sudo iptables -t nat -A POSTROUTING -p tcp --destination 10.1.2.200 --dport 80 -j MASQUERADE # web-linux  lb
+sudo iptables -t nat -A PREROUTING -p tcp --dport 9004 -j DNAT --to-destination 10.1.3.100:80 # win arm demo
+sudo iptables -t nat -A POSTROUTING -p tcp --destination 10.1.3.100 --dport 80 -j MASQUERADE # win arm demo
 sudo /etc/init.d/netfilter-persistent save
 
 echo "<H1>Azure Stack demo Prague</H1>" | sudo tee /var/www/html/index.html
@@ -95,7 +97,10 @@ Add-ADGroupMember -Identity stackusers -Members user1
 
 # Deploy apps
 az group create -n windows-web-rg -l $region
-az group deployment create -g windows-web-rg --template-file stack-windows-web.json --parameters @stack-windows-web.parameters.json
+az group deployment create -g windows-web-rg `
+    --template-file stack-windows-web.json `
+    --parameters @stack-windows-web.parameters.json `
+    --parameters appVersion=v1
 
 az group create -n sql-web-rg -l $region
 az group deployment create -g sql-web-rg --template-file stack-sql-web.json --parameters @stack-sql-web.parameters.json

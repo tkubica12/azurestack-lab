@@ -206,8 +206,8 @@
                                     "settings": {
                                         "configuration": {
                                             "url": "[variables('dscUrl')]",
-                                            "script": "IIS.ps1",
-                                            "function": "[concat('IIS', parameters('appVersion'))]"
+                                            "script": "[concat('IIS', parameters('appVersion'), '.ps1')]",
+                                            "function": "IIS"
                                         }
                                     },
                                     "protectedSettings": {
@@ -228,7 +228,7 @@
                                         ]
                                     },
                                     "protectedSettings": {
-                                        "commandToExecute": "[concat('powershell -ExecutionPolicy Unrestricted -File arcInstallWindows.ps1 ', parameters('arcSecret'))]"
+                                        "commandToExecute": "[concat('powershell -ExecutionPolicy Unrestricted -File arcInstallWindows.ps1 \"', parameters('arcSecret'), '\"')]"
                                     }
                                 }
                             },
