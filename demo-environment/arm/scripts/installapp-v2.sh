@@ -10,7 +10,7 @@ sudo apt-get install -y apt-transport-https
 sudo apt-get update
 sudo apt-get install -y dotnet-sdk-2.1
 
-export db="Server=tcp:$1,1433;Initial Catalog=todo;Persist Security Info=False;User ID=$2;Password=$3;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"
+export db="Server=tcp:$1,1433;Initial Catalog=todo;Persist Security Info=False;User ID=$2;Password=$3;MultipleActiveResultSets=False;Encrypt=False;TrustServerCertificate=False;Connection Timeout=30;"
 
 cat > app.service << EOF
 [Unit]
