@@ -1,3 +1,5 @@
+bash arcInstallLinux.sh $4
+
 sudo mkdir /app
 sudo wget -P /app https://github.com/tkubica12/dotnetcore-sqldb-tutorial/raw/master/linuxrelease-v2.tar
 sudo tar -xvf /app/linuxrelease-v2.tar -C /app
