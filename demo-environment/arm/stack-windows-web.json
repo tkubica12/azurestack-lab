@@ -41,6 +41,17 @@
             "metadata": {
                 "description": "Subnet name"
             }
+        },
+        "appVersion": {
+            "type": "string",
+            "defaultValue": "v1",
+            "allowedValues": [
+                "v1",
+                "v2"
+            ],
+            "metadata": {
+                "description": "Application version"
+            }
         }
     },
     "variables": {
@@ -50,7 +61,7 @@
         "workspaceId": "cf54e67f-43cf-43fa-b1b0-3d047a9dbf1c",
         "vnetResourceGroupName": "networking-rg",
         "vnetName": "demo-net",
-        "dscUrl": "https://github.com/tkubica12/azurestack-lab/blob/master/demo-environment/arm/scripts/IIS.zip?raw=true",
+        "dscUrl": "[concat('https://github.com/tkubica12/azurestack-lab/blob/master/demo-environment/arm/scripts/IIS', parameters('appVersion'), '.zip?raw=true')]",
         "vmSize": "Standard_F2s",
         "count": 2,
         "imageSku": "2019-Datacenter",
@@ -196,7 +207,7 @@
                                         "configuration": {
                                             "url": "[variables('dscUrl')]",
                                             "script": "IIS.ps1",
-                                            "function": "IIS"
+                                            "function": "[concat('IIS', parameters('appVersion'))]"
                                         }
                                     },
                                     "protectedSettings": {

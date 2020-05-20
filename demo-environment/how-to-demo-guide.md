@@ -29,14 +29,15 @@ All installations are automatic using ARM templates to provision infrastructure 
 # Automation - ARM template deployment
 Showcase templates used to build Linux web, Windows web a SQL server.
 
-Deploy templates
+Deploy Windows web farm template with v1 of application
 
 ```powershell
 az group create -n armdemo-web-rg -l $region
 az group deployment create -g armdemo-web-rg --template-file stack-windows-web.json `
-    --parameters adminPassword=$password `
-    --parameters workspaceKey=$workspaceKey `
-    --parameters arcSecret=$arcSecret
+     --parameters @stack-windows-web.parameters.json `
+     --parameters name=demo1 `
+     --parameters lbIp="10.1.3.100" `
+     --parameters subnetName=armdemo-subnet
 ```
 
 In meantime show existing deployment to explain its components and VM Extension used to configure monitoring, install apps or SQL server.
