@@ -16,6 +16,14 @@ $password = ""
 $workspaceKey = ""
 $arcSecret = ""
 
+# Setup deployment environment and secrets
+az group create -n artefacts-rg -l $region
+az keyvault create -n deployment-secrets -l $region -g artefacts-rg --enabled-for-template-deployment
+az keyvault secret set -n adminPassword --vault-name deployment-secrets --value $password
+az keyvault secret set -n sqlPassword --vault-name deployment-secrets --value $password
+az keyvault secret set -n workspaceKey --vault-name deployment-secrets --value $workspaceKey
+az keyvault secret set -n arcSecret --vault-name deployment-secrets --value $arcSecret
+
 # Deploy networking
 az group create -n networking-rg -l $region
 az group deployment create -g networking-rg --template-file stack-networking.json
@@ -25,17 +33,11 @@ az group create -n arc-azurestack-rg -l $region
 
 # Deploy Linux router VM
 az group create -n router-rg -l $region
-az group deployment create -g router-rg --template-file stack-router.json `
-    --parameters adminPassword=$password `
-    --parameters workspaceKey=$workspaceKey `
-    --parameters arcSecret=$arcSecret
+az group deployment create -g router-rg --template-file stack-router.json --parameters @stack-router.parameters.json
 
 # Deploy Active Directory VM
 az group create -n ad-rg -l $region
-az group deployment create -g ad-rg --template-file stack-ad.json `
-    --parameters adminPassword=$password `
-    --parameters workspaceKey=$workspaceKey `
-    --parameters arcSecret=$arcSecret
+az group deployment create -g ad-rg --template-file stack-ad.json --parameters @stack-ad.parameters.json
 
 # Configure router
 ssh stackuser@azurepraha.com
@@ -93,20 +95,10 @@ Add-ADGroupMember -Identity stackusers -Members user1
 
 # Deploy apps
 az group create -n windows-web-rg -l $region
-az group deployment create -g windows-web-rg --template-file stack-windows-web.json `
-    --parameters adminPassword=$password `
-    --parameters workspaceKey=$workspaceKey `
-    --parameters arcSecret=$arcSecret
+az group deployment create -g windows-web-rg --template-file stack-windows-web.json --parameters @stack-windows-web.parameters.json
 
 az group create -n sql-web-rg -l $region
-az group deployment create -g sql-web-rg --template-file stack-sql-web.json `
-    --parameters adminPassword=$password `
-    --parameters workspaceKey=$workspaceKey `
-    --parameters arcSecret=$arcSecret
+az group deployment create -g sql-web-rg --template-file stack-sql-web.json --parameters @stack-sql-web.parameters.json
 
 az group create -n linux-web-rg -l $region
-az group deployment create -g linux-web-rg --template-file stack-linux-web.json `
-    --parameters adminPassword=$password `
-    --parameters sqlPassword=$password `
-    --parameters workspaceKey=$workspaceKey `
-    --parameters arcSecret=$arcSecret
+az group deployment create -g linux-web-rg --template-file stack-linux-web.json --parameters @stack-linux-web.parameters.json

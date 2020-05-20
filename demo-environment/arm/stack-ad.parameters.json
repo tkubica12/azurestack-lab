@@ -1,0 +1,30 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "adminPassword": {
+            "reference": {
+                "keyVault": {
+                    "id": "/subscriptions/15e626dc-8071-4dcd-b478-887d1e7fc792/resourceGroups/artefacts-rg/providers/Microsoft.KeyVault/vaults/deployment-secrets"
+                },
+                "secretName": "adminPassword"
+            }
+        },
+        "workspaceKey": {
+            "reference": {
+                "keyVault": {
+                    "id": "/subscriptions/15e626dc-8071-4dcd-b478-887d1e7fc792/resourceGroups/artefacts-rg/providers/Microsoft.KeyVault/vaults/deployment-secrets"
+                },
+                "secretName": "workspaceKey"
+            }
+        },
+        "arcSecret": {
+            "reference": {
+                "keyVault": {
+                    "id": "/subscriptions/15e626dc-8071-4dcd-b478-887d1e7fc792/resourceGroups/artefacts-rg/providers/Microsoft.KeyVault/vaults/deployment-secrets"
+                },
+                "secretName": "arcSecret"
+            }
+        }
+    }
+}

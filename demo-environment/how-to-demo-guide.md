@@ -1,5 +1,9 @@
 # Demo architecture
-TBD
+External access:
+- Windows web on VMSS: http://azurepraha:9002
+- Linux todo web on VMSS: http://azurepraha:9003
+- SSH to router: azurepraha.com:22
+- RDP to AD: azurepraha:9001
 
 # Monitoring
 All VMs are configured with VM Extensions to provision agents to be monitored from Azure including Azure Monitor agent, Dependency agent and onboarding to Azure Arc for Servers.
@@ -13,8 +17,8 @@ All VMs are configured with VM Extensions to provision agents to be monitored fr
 There are two apps - one Windows and one Linux deployed as VMSS. This solution automatically creates VMs and use VM Extensions to configure application. Use Scale to quickly increase number of Web VMs behind load-balancer.
 
 External IPs:
-- Linux web: azurepraha.com:9003
-- Windows web: azurepraha:9001
+- Linux web: http://azurepraha:9003
+- Windows web: http://azurepraha:9002
 
 Windows app is simple web page returning node ID. Use curl (or disable cookie session persistance) to show how requests are balanced. Via GUI increase or decrease VM count.
 
@@ -25,7 +29,15 @@ All installations are automatic using ARM templates to provision infrastructure 
 # Automation - ARM template deployment
 Showcase templates used to build Linux web, Windows web a SQL server.
 
-Deploy templates (TBD)
+Deploy templates
+
+```powershell
+az group create -n armdemo-web-rg -l $region
+az group deployment create -g armdemo-web-rg --template-file stack-windows-web.json `
+    --parameters adminPassword=$password `
+    --parameters workspaceKey=$workspaceKey `
+    --parameters arcSecret=$arcSecret
+```
 
 In meantime show existing deployment to explain its components and VM Extension used to configure monitoring, install apps or SQL server.
 

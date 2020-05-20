@@ -108,6 +108,15 @@
                                 "id": "[resourceId('Microsoft.Network/networkSecurityGroups', 'no-external-inbound-nsg')]"
                             }
                         }
+                    },
+                    {
+                        "name": "armdemo-subnet",
+                        "properties": {
+                            "addressPrefix": "10.1.3.0/24",
+                            "networkSecurityGroup": {
+                                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', 'no-external-inbound-nsg')]"
+                            }
+                        }
                     }
                 ]
             }
