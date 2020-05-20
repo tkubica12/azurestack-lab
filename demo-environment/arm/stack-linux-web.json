@@ -9,6 +9,12 @@
                 "description": "The password for the Administrator account of the new VMs. Default value is subscription id"
             }
         },
+        "sqlPassword": {
+            "type": "securestring",
+            "metadata": {
+                "description": "The password for the Administrator account of the new VMs. Default value is subscription id"
+            }
+        },
         "workspaceKey": {
             "type": "securestring",
             "metadata": {
@@ -35,20 +41,38 @@
                 "description": "Static private LB address"
             }
         },
+        "sqlIp": {
+            "type": "string",
+            "defaultValue": "10.1.2.250",
+            "metadata": {
+                "description": "Static private LB address"
+            }
+        },
         "subnetName": {
             "type": "string",
             "defaultValue": "apps-subnet",
             "metadata": {
                 "description": "Subnet name"
             }
+        },
+        "appVersion": {
+            "type": "string",
+            "defaultValue": "v1",
+            "allowedValues": [
+                "v1",
+                "v2"
+            ],
+            "metadata": {
+                "description": "Application version"
+            }
         }
     },
     "variables": {
         "adminUsername": "stackuser",
+        "sqlUsername": "stackuser",
         "workspaceId": "cf54e67f-43cf-43fa-b1b0-3d047a9dbf1c",
         "vnetResourceGroupName": "networking-rg",
         "vnetName": "demo-net",
-        "dscUrl": "https://github.com/tkubica12/azurestack-lab/blob/master/demo-environment/arm/scripts/IIS.zip?raw=true",
         "vmSize": "Standard_F2s",
         "count": 2,
         "imageSku": "18.04-LTS",
@@ -183,24 +207,6 @@
                     "extensionProfile": {
                         "extensions": [
                             {
-                                "type": "Microsoft.Compute/virtualMachines/extensions",
-                                "name": "registerArc",
-                                "properties": {
-                                    "publisher": "Microsoft.Azure.Extensions",
-                                    "type": "CustomScript",
-                                    "typeHandlerVersion": "2.0",
-                                    "autoUpgradeMinorVersion": true,
-                                    "settings": {
-                                    },
-                                    "protectedSettings": {
-                                        "commandToExecute": "[concat('bash arcInstallLinux.sh ', parameters('arcSecret'))]",
-                                        "fileUris": [
-                                            "https://raw.githubusercontent.com/tkubica12/azurestack-lab/master/demo-environment/arm/scripts/arcInstallLinux.sh"
-                                        ]
-                                    }
-                                }
-                            },
-                            {
                                 "name": "DependencyAgent",
                                 "type": "Microsoft.Compute/virtualMachines/extensions",
                                 "properties": {
@@ -224,6 +230,25 @@
                                     },
                                     "protectedSettings": {
                                         "workspaceKey": "[parameters('workspaceKey')]"
+                                    }
+                                }
+                            },
+                            {
+                                "type": "Microsoft.Compute/virtualMachines/extensions",
+                                "name": "installAppAndRegisterArc",
+                                "properties": {
+                                    "publisher": "Microsoft.Azure.Extensions",
+                                    "type": "CustomScript",
+                                    "typeHandlerVersion": "2.0",
+                                    "autoUpgradeMinorVersion": true,
+                                    "settings": {
+                                    },
+                                    "protectedSettings": {
+                                        "commandToExecute": "[concat('bash installapp-', parameters('appVersion'), '.sh ', parameters('sqlIp'), ' ', variables('sqlUsername'), ' ',  parameters('sqlPassword'), ' ', parameters('arcSecret'))]",
+                                        "fileUris": [
+                                            "[concat('https://raw.githubusercontent.com/tkubica12/azurestack-lab/master/demo-environment/arm/scripts/installapp-', parameters('appVersion'), '.sh')]",
+                                            "https://raw.githubusercontent.com/tkubica12/azurestack-lab/master/demo-environment/arm/scripts/arcInstallLinux.sh"
+                                        ]
                                     }
                                 }
                             }

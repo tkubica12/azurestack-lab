@@ -38,7 +38,7 @@ az group deployment create -g ad-rg --template-file stack-ad.json `
     --parameters arcSecret=$arcSecret
 
 # Configure router
-ssh stackuser@$routerIp
+ssh stackuser@azurepraha.com
 sudo apt update
 sudo apt install iptables-persistent nginx -y
 echo net.ipv4.ip_forward=1 | sudo tee -a /etc/sysctl.conf
@@ -48,8 +48,8 @@ sudo iptables -t nat -A PREROUTING -p tcp --dport 9001 -j DNAT --to-destination 
 sudo iptables -t nat -A POSTROUTING -p tcp --destination 10.1.1.100 --dport 3389 -j MASQUERADE # AD RDP
 sudo iptables -t nat -A PREROUTING -p tcp --dport 9002 -j DNAT --to-destination 10.1.2.100:80 # AD web-win
 sudo iptables -t nat -A POSTROUTING -p tcp --destination 10.1.2.100 --dport 80 -j MASQUERADE # AD web-win
-sudo iptables -t nat -A PREROUTING -p tcp --dport 9003 -j DNAT --to-destination 10.1.2.8:3389 # AD web-win
-sudo iptables -t nat -A POSTROUTING -p tcp --destination 10.1.2.8 --dport 3389 -j MASQUERADE # AD web-win
+sudo iptables -t nat -A PREROUTING -p tcp --dport 9003 -j DNAT --to-destination 10.1.2.200:80 # AD lin-win
+sudo iptables -t nat -A POSTROUTING -p tcp --destination 10.1.2.200 --dport 80 -j MASQUERADE # AD lin-win
 sudo /etc/init.d/netfilter-persistent save
 
 echo "<H1>Azure Stack demo Prague</H1>" | sudo tee /var/www/html/index.html
@@ -101,5 +101,12 @@ az group deployment create -g windows-web-rg --template-file stack-windows-web.j
 az group create -n sql-web-rg -l $region
 az group deployment create -g sql-web-rg --template-file stack-sql-web.json `
     --parameters adminPassword=$password `
+    --parameters workspaceKey=$workspaceKey `
+    --parameters arcSecret=$arcSecret
+
+az group create -n linux-web-rg -l $region
+az group deployment create -g linux-web-rg --template-file stack-linux-web.json `
+    --parameters adminPassword=$password `
+    --parameters sqlPassword=$password `
     --parameters workspaceKey=$workspaceKey `
     --parameters arcSecret=$arcSecret
