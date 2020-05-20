@@ -15,7 +15,7 @@ configuration IIS
 
         xRemoteFile DownloadFile
         {
-            DestinationPath = 'c:\inetpub\wwwroot'
+            DestinationPath = 'c:\inetpub\wwwroot\info.aspx'
             Uri = "https://raw.githubusercontent.com/tkubica12/azurestack-lab/master/demo-environment/arm/scripts/infov1.aspx"
         }
     }
