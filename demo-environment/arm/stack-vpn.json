@@ -1,0 +1,94 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "name": {
+            "defaultValue": "stack2azure-vgw",
+            "type": "string"
+        },
+        "location": {
+            "defaultValue": "prghub",
+            "type": "string"
+        },
+        "sku": {
+            "defaultValue": "Standard",
+            "type": "string"
+        },
+        "gatewayType": {
+            "defaultValue": "Vpn",
+            "type": "string"
+        },
+        "vpnType": {
+            "defaultValue": "RouteBased",
+            "type": "string"
+        },
+        "existingVirtualNetworkName": {
+            "defaultValue": "demo-net",
+            "type": "string"
+        },
+        "newSubnetName": {
+            "defaultValue": "GatewaySubnet",
+            "type": "string"
+        },
+        "subnetAddressPrefix": {
+            "defaultValue": "10.1.10.0/24",
+            "type": "string"
+        },
+        "newPublicIpAddressName": {
+            "defaultValue": "stack2azure-vgw-ip",
+            "type": "string"
+        }
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Network/virtualNetworkGateways",
+            "name": "[parameters('name')]",
+            "apiVersion": "2017-10-01",
+            "location": "[parameters('location')]",
+            "properties": {
+                "gatewayType": "[parameters('gatewayType')]",
+                "ipConfigurations": [
+                    {
+                        "name": "default",
+                        "properties": {
+                            "privateIPAllocationMethod": "Dynamic",
+                            "subnet": {
+                                "id": "[resourceId('networking-rg', 'Microsoft.Network/virtualNetworks/subnets', parameters('existingVirtualNetworkName'), parameters('newSubnetName'))]"
+                            },
+                            "publicIpAddress": {
+                                "id": "[resourceId('networking-rg', 'Microsoft.Network/publicIPAddresses', parameters('newPublicIpAddressName'))]"
+                            }
+                        }
+                    }
+                ],
+                "vpnType": "[parameters('vpnType')]",
+                "sku": {
+                    "name": "[parameters('sku')]",
+                    "tier": "[parameters('sku')]"
+                }
+            },
+            "dependsOn": [
+                "Microsoft.Network/virtualNetworks/demo-net/subnets/GatewaySubnet",
+                "[concat('Microsoft.Network/publicIPAddresses/', parameters('newPublicIpAddressName'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Network/virtualNetworks/subnets",
+            "name": "[concat(parameters('existingVirtualNetworkName'), '/', parameters('newSubnetName'))]",
+            "apiVersion": "2017-10-01",
+            "location": "[parameters('location')]",
+            "properties": {
+                "addressPrefix": "[parameters('subnetAddressPrefix')]"
+            }
+        },
+        {
+            "type": "Microsoft.Network/publicIPAddresses",
+            "name": "[parameters('newPublicIpAddressName')]",
+            "apiVersion": "2017-10-01",
+            "location": "[parameters('location')]",
+            "properties": {
+                "publicIPAllocationMethod": "Dynamic"
+            }
+        }
+    ]
+}
