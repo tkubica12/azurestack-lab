@@ -1,0 +1,145 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "gatewayName": {
+            "type": "string",
+            "defaultValue": "azure2stack-vgw"
+        },
+        "location": {
+            "type": "string",
+            "defaultValue": "westeurope"
+        },
+        "sku": {
+            "type": "string",
+            "defaultValue": "VpnGw1"
+        },
+        "gatewayType": {
+            "type": "string",
+            "defaultValue": "Vpn",
+            "allowedValues": [
+                "Vpn",
+                "ExpressRoute"
+            ]
+        },
+        "vpnGatewayGeneration": {
+            "type": "string",
+            "defaultValue": "Generation1"
+        },
+        "vpnType": {
+            "type": "string",
+            "defaultValue": "RouteBased",
+            "allowedValues": [
+                "RouteBased",
+                "PolicyBased"
+            ]
+        },
+        "newPublicIpAddressName": {
+            "type": "string",
+            "defaultValue": "azure2stack-vgw-ip"
+        },
+        "newSubnetName": {
+            "type": "string",
+            "defaultValue": "GatewaySubnet"
+        },
+        "newVNETName": {
+            "type": "string",
+            "defaultValue": "azure-demo-net"
+        },
+        "VNETSubnet": {
+            "type": "string",
+            "defaultValue": "10.2.0.0/16"
+        },
+        "gatewaySubnet": {
+            "type": "string",
+            "defaultValue": "10.2.10.0/24"
+        }
+    },
+    "resources": [
+        {
+            "apiVersion": "2019-04-01",
+            "name": "[parameters('gatewayName')]",
+            "type": "Microsoft.Network/virtualNetworkGateways",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "Microsoft.Resources/deployments/azure-demo-net",
+                "[concat('Microsoft.Network/publicIPAddresses/', parameters('newPublicIpAddressName'))]"
+            ],
+            "tags": {},
+            "properties": {
+                "gatewayType": "[parameters('gatewayType')]",
+                "ipConfigurations": [
+                    {
+                        "name": "default",
+                        "properties": {
+                            "privateIPAllocationMethod": "Dynamic",
+                            "subnet": {
+                                "id": "[resourceId('networking-rg', 'Microsoft.Network/virtualNetworks/subnets', parameters('newVNETName'), parameters('newSubnetName'))]"
+                            },
+                            "publicIpAddress": {
+                                "id": "[resourceId('networking-rg', 'Microsoft.Network/publicIPAddresses', parameters('newPublicIpAddressName'))]"
+                            }
+                        }
+                    }
+                ],
+                "vpnType": "[parameters('vpnType')]",
+                "vpnGatewayGeneration": "[parameters('vpnGatewayGeneration')]",
+                "sku": {
+                    "name": "[parameters('sku')]",
+                    "tier": "[parameters('sku')]"
+                }
+            }
+        },
+        {
+            "name": "azure-demo-net",
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2017-05-10",
+            "dependsOn": [],
+            "properties": {
+                "mode": "Incremental",
+                "template": {
+                    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {},
+                    "variables": {},
+                    "resources": [
+                        {
+                            "name": "azure-demo-net",
+                            "id": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/networking-rg/providers/Microsoft.Network/virtualNetworks/', parameters('newVNETName'))]",
+                            "location": "westeurope",
+                            "type": "Microsoft.Network/virtualNetworks",
+                            "properties": {
+                                "subnets": [
+                                    {
+                                        "id": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/networking-rg/providers/Microsoft.Network/virtualNetworks/azure-demo-net/subnets/', parameters('newSubnetName'))]",
+                                        "name": "GatewaySubnet",
+                                        "properties": {
+                                            "addressPrefix": "[parameters('gatewaySubnet')]"
+                                        }
+                                    }
+                                ],
+                                "addressSpace": {
+                                    "addressPrefixes": "[parameters('VNETSubnet')]"
+                                }
+                            },
+                            "tags": {},
+                            "apiVersion": "2019-09-01",
+                            "dependsOn": []
+                        }
+                    ]
+                },
+                "parameters": {}
+            },
+            "resourceGroup": "networking-rg"
+        },
+        {
+            "apiVersion": "2019-02-01",
+            "type": "Microsoft.Network/publicIPAddresses",
+            "name": "[parameters('newPublicIpAddressName')]",
+            "location": "[parameters('location')]",
+            "properties": {
+                "publicIPAllocationMethod": "Dynamic"
+            }
+        }
+    ]
+}
