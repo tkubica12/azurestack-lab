@@ -4,6 +4,7 @@ External access:
 - Linux todo web on VMSS: http://azurepraha:9003
 - SSH to router: azurepraha.com:22
 - RDP to AD: azurepraha:9001
+- RDP to SQL VM: azurepraha:9005
 - VMSS ARM automation demo: http://azurepraha:9004/info.aspx
 
 # Monitoring

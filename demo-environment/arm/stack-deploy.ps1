@@ -54,6 +54,8 @@ sudo iptables -t nat -A PREROUTING -p tcp --dport 9003 -j DNAT --to-destination 
 sudo iptables -t nat -A POSTROUTING -p tcp --destination 10.1.2.200 --dport 80 -j MASQUERADE # web-linux  lb
 sudo iptables -t nat -A PREROUTING -p tcp --dport 9004 -j DNAT --to-destination 10.1.3.100:80 # win arm demo
 sudo iptables -t nat -A POSTROUTING -p tcp --destination 10.1.3.100 --dport 80 -j MASQUERADE # win arm demo
+sudo iptables -t nat -A PREROUTING -p tcp --dport 9005 -j DNAT --to-destination 10.1.2.250:3389 # SQL RDP
+sudo iptables -t nat -A POSTROUTING -p tcp --destination 10.1.2.250 --dport 3389 -j MASQUERADE # SQL RDP
 sudo /etc/init.d/netfilter-persistent save
 
 echo "<H1>Azure Stack demo Prague</H1>" | sudo tee /var/www/html/index.html
