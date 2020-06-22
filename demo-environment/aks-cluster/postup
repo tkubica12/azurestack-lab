@@ -15,12 +15,13 @@ Service Principal (vytvoren v tenantu AzureStack PRG) - pres AzurePortal:
 	Návod zde:
 	https://docs.microsoft.com/en-us/azure-stack/operator/azure-stack-create-service-principals?view=azs-2002
 	Jméno:		Azure Stack - AKS Cluster
-	App (client) ID:	ce14531e-23e1-4eef-93a1-5be6c9cd8a38
+	App (client) ID:		ce14531e-23e1-4eef-93a1-5be6c9cd8a38
 	Tenant (directory) ID:	2e5ca8aa-bf51-471d-9604-802e7b39a642
-	Object ID:		74045fd5-98dd-4916-b990-f9c74e53a11b
+	Object ID:				74045fd5-98dd-4916-b990-f9c74e53a11b
 	Secret:
 	Popis:	AKS Cluster SPN Secret
-	Value:	*******************************************
+	Value:	viz azure portal, případně powershell (?)
+	
 	Přiřadit roli Contributor z AzS User portálu (subskripce Demo)
 Vše z User portálu (Demo Subskripce)	
 Vytvořit RG pro AKS Cluster:
@@ -34,9 +35,10 @@ User:			k8sadmin
 Zabezpeceni:	SSH key
 Public key:
 ---- BEGIN SSH2 PUBLIC KEY ----
+
 ---- END SSH2 PUBLIC KEY ----
 
-PassPhrase:		********************
+PassPhrase:		$AKS-cluster-passPhrase (keyvault deployment-secrets)
 Size:			DS2_v2
 vNET:			k8s-cluster-rg-vnet
 Public IP:		k8s-client-vm-ip
@@ -64,19 +66,19 @@ Příprava SSH klíče:
 k8sadmin@k8s-client-vm:~$ ssh-keygen -t rsa
 Generating public/private rsa key pair.
 Enter file in which to save the key (/home/k8sadmin/.ssh/id_rsa):
-Enter passphrase (empty for no passphrase):		AzureStackDemok8sKlic
-Enter same passphrase again:					AzureStackDemok8sKlic
+Enter passphrase (empty for no passphrase):		$AKS-cluster-passPhrase (keyvault deployment-secrets)
+Enter same passphrase again:					$AKS-cluster-passPhrase (keyvault deployment-secrets)
 Your identification has been saved in /home/k8sadmin/.ssh/id_rsa.
 Your public key has been saved in /home/k8sadmin/.ssh/id_rsa.pub.
 The key fingerprint is:
-SHA256:******************************************************************
+SHA256:BjALGvgKwp4rHPCckNx7abq4iak8e8xorOM+nqI5jXA k8sadmin@k8s-client-vm
 The key's randomart image is:
 +---[RSA 2048]----+
 
 +----[SHA256]-----+
 
 cat /home/k8sadmin/.ssh/id_rsa.pub
-ssh-rsa *******************************************************************************ZP4PqzGk6kNOfh8V492K8BR7T5A03tjlngBHXSroMSXoohbfp+kNmP2WcNt8HFUPaHuALChBpAeGveWwz1fyfts4fFdOE8Rm+ahHU8Y1ac9ArzjxTpCsgkPKZ3r4ydd2FBaPwyoS97FueRlG6Y//R52tYLJv9BflRzi2A9yZO5fBjqeN2xC1TlB9BrQ1A4uud02rYNJPuMxcGQvcAAkTTNA9rVnPJSbtNqUj k8sadmin@k8s-client-vm
+$AKS-cluster-private-key (keyvault deployment-secrets)
 
 Bylo potřeba stáhnout poslední verzi AKS Ubuntu 16.04 image  Image Publisher: microsoft-aks, Offer: aks, SKU: aks-engine-ubuntu-1604-202005, Version: 2020.05.13
 
@@ -142,14 +144,14 @@ k8sadmin@k8s-client-vm:~$ nano ./kubernetes-azurestack.json
             "ssh": {
                 "publicKeys": [
                     {
-                        "keyData": "ssh-rsa ******************AQABAAABAQC4dLb/uNiJCfblE7BHBjHCbJJtg9gTtUCz2IA7XTaMmliEc51o4LunlUW5EEzb7yzq7DIVOrfjvwDVTY+o2wpvCIeHxYAFoA9lfRqL65yP1LvHoQoeZP4PqzGk6kNOfh8V492K8BR$
+                        "keyData": $AKS-cluster-private-key
                     }
                 ]
             }
         },
         "servicePrincipalProfile": {
-            "clientId": "***************-93a1-5be6c9cd8a38",
-            "secret": "*****************_1BDl0OLvd~gsL_Ae"
+            "clientId": "ce14531e-23e1-4eef-93a1-5be6c9cd8a38",
+            "secret": $AKS-cluster-client-secret
         }
     }
 }
@@ -164,9 +166,9 @@ aks-engine deploy \
 --resource-group k8s-cluster-rg \
 --api-model ./kubernetes-azurestack.json \
 --output-directory kube-rg \
---client-id ce1*************1-4eef-93a1-5be6c9cd8a38 \
---client-secret -*********r4iw_1BDl0OLvd~gsL_Ae \
---subscription-id 15e626dc-8071-4dcd-b478-887d1e7fc792
+--client-id ce14531e-23e1-4eef-93a1-5be6c9cd8a38 \
+--client-secret $AKS-cluster-client-secret \
+--subscription-id $subscription-id
 
 Po úspěšném nasazení clusteru:
 Překonvertovat pomocí Putty nebo podobného nástroje klíč vygenerovaný pro aks-cluster do formátu pro připojení pomocí SSH 
