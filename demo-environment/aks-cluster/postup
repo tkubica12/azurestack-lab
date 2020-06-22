@@ -33,7 +33,7 @@ Jméno:			k8s-client-vm
 Disk Type:		Premium SSD
 User:			k8sadmin
 Zabezpeceni:	SSH key
-Public key:
+Public key:		
 ---- BEGIN SSH2 PUBLIC KEY ----
 
 ---- END SSH2 PUBLIC KEY ----
@@ -78,7 +78,7 @@ The key's randomart image is:
 +----[SHA256]-----+
 
 cat /home/k8sadmin/.ssh/id_rsa.pub
-$AKS-cluster-private-key (keyvault deployment-secrets)
+$AKS-cluster-public-key (keyvault deployment-secrets)
 
 Bylo potřeba stáhnout poslední verzi AKS Ubuntu 16.04 image  Image Publisher: microsoft-aks, Offer: aks, SKU: aks-engine-ubuntu-1604-202005, Version: 2020.05.13
 
@@ -144,7 +144,7 @@ k8sadmin@k8s-client-vm:~$ nano ./kubernetes-azurestack.json
             "ssh": {
                 "publicKeys": [
                     {
-                        "keyData": $AKS-cluster-private-key
+                        "keyData": $AKS-cluster-public-key
                     }
                 ]
             }
@@ -177,6 +177,8 @@ Překonvertovat pomocí Putty nebo podobného nástroje klíč vygenerovaný pro
 připojit se k jednomu z master nodů pšes SSH a ověřit funkčnost clusteru:
 Name:	k8s-master-12241785-0
 IP:		62.168.63.172
+Private key:	$AKS-cluster-private-key
+PassPhrase:		$AKS-cluster-passphrase
 vytvořit sample deployment Redisu:
 kubectl apply -f https://k8s.io/examples/application/guestbook/redis-master-deployment.yaml
 
