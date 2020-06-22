@@ -9,4 +9,4 @@ Follow [arm/azure-deploy.ps1](arm/azure-deploy.ps1) to prepare Azure part of dem
 
 Follow [arm/stack-deploy.ps1](arm/stack-deploy.ps1) to deploy and configure Azure Stack environment.
 
-Follow .[aks-cluster/postup](aks-cluster/postup) to deploy an AKS cluster to AzS Demo environment.
+Follow [aks-cluster/postup](aks-cluster/postup) to deploy an AKS cluster to AzS Demo environment.
