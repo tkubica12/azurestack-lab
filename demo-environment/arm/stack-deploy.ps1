@@ -14,7 +14,6 @@ az account set -s "demo"
 $region = "prghub" 
 $password = ""
 $workspaceKey = ""
-$arcSecret = ""
 
 # Setup deployment environment and secrets
 az group create -n artefacts-rg -l $region
@@ -22,7 +21,6 @@ az keyvault create -n deployment-secrets -l $region -g artefacts-rg --enabled-fo
 az keyvault secret set -n adminPassword --vault-name deployment-secrets --value $password
 az keyvault secret set -n sqlPassword --vault-name deployment-secrets --value $password
 az keyvault secret set -n workspaceKey --vault-name deployment-secrets --value $workspaceKey
-az keyvault secret set -n arcSecret --vault-name deployment-secrets --value $arcSecret
 
 # Deploy networking
 az group create -n networking-rg -l $region

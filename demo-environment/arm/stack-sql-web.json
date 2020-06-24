@@ -209,29 +209,6 @@
             }
         },
         {
-            "apiVersion": "2015-06-15",
-            "type": "Microsoft.Compute/virtualMachines/extensions",
-            "name": "[concat(variables('vmName'), '/registerArc')]",
-            "location": "[resourceGroup().location]",
-            "dependsOn": [
-                "[concat('Microsoft.Compute/virtualMachines/', variables('vmName'))]"
-            ],
-            "properties": {
-                "publisher": "Microsoft.Compute",
-                "type": "CustomScriptExtension",
-                "typeHandlerVersion": "1.9",
-                "autoUpgradeMinorVersion": true,
-                "settings": {
-                    "fileUris": [
-                        "https://raw.githubusercontent.com/tkubica12/azurestack-lab/master/demo-environment/arm/scripts/arcInstallWindows.ps1"
-                    ]
-                },
-                "protectedSettings": {
-                    "commandToExecute": "[concat('powershell -ExecutionPolicy Unrestricted -File arcInstallWindows.ps1 ', parameters('arcSecret'))]"
-                }
-            }
-        },
-        {
             "name": "[variables('nicName')]",
             "type": "Microsoft.Network/networkInterfaces",
             "apiVersion": "2017-10-01",

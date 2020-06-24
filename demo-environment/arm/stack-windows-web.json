@@ -216,24 +216,6 @@
                             },
                             {
                                 "type": "Microsoft.Compute/virtualMachines/extensions",
-                                "name": "registerArc",
-                                "properties": {
-                                    "publisher": "Microsoft.Compute",
-                                    "type": "CustomScriptExtension",
-                                    "typeHandlerVersion": "1.9",
-                                    "autoUpgradeMinorVersion": true,
-                                    "settings": {
-                                        "fileUris": [
-                                            "https://raw.githubusercontent.com/tkubica12/azurestack-lab/master/demo-environment/arm/scripts/arcInstallWindows.ps1"
-                                        ]
-                                    },
-                                    "protectedSettings": {
-                                        "commandToExecute": "[concat('powershell -ExecutionPolicy Unrestricted -File arcInstallWindows.ps1 \"', parameters('arcSecret'), '\"')]"
-                                    }
-                                }
-                            },
-                            {
-                                "type": "Microsoft.Compute/virtualMachines/extensions",
                                 "name": "joindomain",
                                 "properties": {
                                     "publisher": "Microsoft.Compute",
