@@ -1,0 +1,123 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {},
+    "resources": [
+        {
+            "type": "Microsoft.Authorization/policyAssignments",
+            "name": "kube-no-privileged",
+            "apiVersion": "2019-06-01",
+            "properties": {
+                "scope": "[subscription().id]",
+                "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/95edb821-ddaf-4404-9732-666045e056b4",
+                "displayName": "Kubernetes - do not allow privileged containers",
+                "parameters": {
+                    "excludedNamespaces": {
+                        "value": [
+                            "kube-system",
+                            "default",
+                            "azure-arc",
+                            "kube-public",
+                            "kube-node-lease"
+                        ]
+                    }
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Authorization/policyAssignments",
+            "name": "kube-https-ingress",
+            "apiVersion": "2019-06-01",
+            "properties": {
+                "scope": "[subscription().id]",
+                "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/1a5b4dca-0b6f-4cf5-907c-56316bc1bf3d",
+                "displayName": "Kubernetes - enforce HTTPS on Ingress",
+                "parameters": {
+                    "excludedNamespaces": {
+                        "value": [
+                            "kube-system",
+                            "default",
+                            "azure-arc",
+                            "kube-public",
+                            "kube-node-lease"
+                        ]
+                    }
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Authorization/policyAssignments",
+            "name": "kube-no-public-lb",
+            "apiVersion": "2019-06-01",
+            "properties": {
+                "scope": "[subscription().id]",
+                "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/3fc4dc25-5baf-40d8-9b05-7fe74c1bc64e",
+                "displayName": "Kubernetes - no Public IP on Load Balancer",
+                "parameters": {
+                    "excludedNamespaces": {
+                        "value": [
+                            "kube-system",
+                            "default",
+                            "azure-arc",
+                            "kube-public",
+                            "kube-node-lease"
+                        ]
+                    }
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Authorization/policyAssignments",
+            "name": "kube-resource-limits",
+            "apiVersion": "2019-06-01",
+            "properties": {
+                "scope": "[subscription().id]",
+                "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/e345eecc-fa47-480f-9e88-67dcc122b164",
+                "displayName": "Kubernetes - resource limits must be specified and no more than ...",
+                "parameters": {
+                    "cpuLimit": {
+                        "value": "200m"
+                    },
+                    "memoryLimit": {
+                        "value": "128Mi"
+                    },
+                    "excludedNamespaces": {
+                        "value": [
+                            "kube-system",
+                            "default",
+                            "azure-arc",
+                            "kube-public",
+                            "kube-node-lease"
+                        ]
+                    }
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Authorization/policyAssignments",
+            "name": "kube-mandatory-labels",
+            "apiVersion": "2019-06-01",
+            "properties": {
+                "scope": "[subscription().id]",
+                "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/46592696-4c7b-4bf3-9e45-6c2763bdc0a6",
+                "displayName": "Kubernetes - label release-type is mandatory",
+                "parameters": {
+                    "labelsList": {
+                        "value": [
+                            "release-type"
+                        ]
+                    },
+                    "excludedNamespaces": {
+                        "value": [
+                            "kube-system",
+                            "default",
+                            "azure-arc",
+                            "kube-public",
+                            "kube-node-lease"
+                        ]
+                    }
+                }
+            }
+        }
+    ]
+}
