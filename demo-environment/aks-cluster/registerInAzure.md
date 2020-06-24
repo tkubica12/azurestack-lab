@@ -53,5 +53,18 @@ Onboard cluster
 bash enable-monitoring.sh --resource-id $azureArcClusterResourceId --workspace-id $logAnalyticsWorkspaceResourceId
 ```
 
+# Configure GitOps to control cluster state and deploy apps
 
-
+```bash
+az k8sconfiguration create \
+    --name gitops-aks-state \
+    --cluster-name aks-azure-stack \
+    --resource-group arc-azurestack-rg \
+    --operator-instance-name cluster-config \
+    --operator-namespace default \
+    --repository-url https://github.com/tkubica12/azurestack-lab \
+    --scope cluster \
+    --cluster-type connectedClusters \
+    --enable-helm-operator \
+    --operator-params='--git-readonly --git-path=demo-environment/gitops-aks-state'
+```
