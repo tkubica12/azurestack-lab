@@ -4,3 +4,5 @@ arm-solutions/IIS.zip
 demo-environment/operator-scripts/azurestack.pfx
 demo-environment/operator-scripts/azurestack-apiftpsso.pfx
 demo-environment/arm/.secrets.ps1
+demo-environment/aks-cluster/kubeconfig.yaml
+demo-environment/aks-cluster/enable-monitoring.sh
