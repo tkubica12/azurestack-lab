@@ -65,6 +65,8 @@ az k8sconfiguration create \
     --repository-url https://github.com/tkubica12/azurestack-lab \
     --scope cluster \
     --cluster-type connectedClusters \
+    --operator-params='--git-readonly --git-path=demo-environment/gitops-aks-state' \
     --enable-helm-operator \
-    --operator-params='--git-readonly --git-path=demo-environment/gitops-aks-state'
+    --helm-operator-version='0.6.0' \
+    --helm-operator-params='--set helm.versions=v3'
 ```
