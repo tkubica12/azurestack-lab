@@ -10,7 +10,7 @@
         {
             "type": "Microsoft.Network/dnszones/CNAME",
             "apiVersion": "2018-05-01",
-            "name": "[concat(variables('publicDomain'), '/aks')]",
+            "name": "[concat(variables('publicDomain'), '/*.aks')]",
             "properties": {
                 "TTL": 3600,
                 "CNAMERecord": {
