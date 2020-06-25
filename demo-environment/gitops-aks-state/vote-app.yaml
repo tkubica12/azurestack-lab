@@ -75,3 +75,20 @@ spec:
   - port: 80
   selector:
     app: azure-vote-front
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    ingress.kubernetes.io/rewrite-target: /
+  name: azure-vote-ingress
+spec:
+  rules:
+    - host: vote.aks.azurepraha.com
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: azure-vote-front
+              servicePort: 80

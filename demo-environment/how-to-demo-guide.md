@@ -11,7 +11,6 @@ External access:
 All VMs are configured with VM Extensions to provision agents to be monitored from Azure including Azure Monitor agent, Dependency agent and onboarding to Azure Arc for Servers.
 
 - Show VM Extensions on Windows and Linux machines
-- In Azure open arc-azurestack-rg and showcase Azure Arc for Servers
 - In Azure open Azure Monitor and show VM Insights including Map and telemetry
 - In Azure open Azure Monitor Logs and search for logs from all monitored VMs
 
@@ -98,3 +97,11 @@ Destroy demo environment.
 ```powershell
 az group delete -n armdemo-web-rg -y
 ```
+
+# Kubernetes
+Show Azure Arc for Kubernetes in AzureStackCZSK subscription arc-azurestack-rg resource group.
+
+Go to Configuration section and explain, that complete state of cluster (deployed applications, reverse proxy and other components) is managed in declarative manner in this repo demo-environment/gitops-aks-state and demo-environment/helm folders using GitOps principles (Arc periodicaly downloads desired state and is making sure Kubernetes is configured accordingly and apps are deployed).
+
+Vote is accessible at http://vote.aks.azurepraha.com
+

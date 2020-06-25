@@ -1,4 +1,6 @@
 # Login to AzureStackCZSK subscription
+az cloud set -n AzureCloud
+az login
 az account set -s AzureStackCZSK
 
 # Deploy monitoring
