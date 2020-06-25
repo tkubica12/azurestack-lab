@@ -34,12 +34,6 @@
             "metadata": {
                 "description": "Azure Monitor workspace key"
             }
-        },
-        "arcSecret": {
-            "type": "securestring",
-            "metadata": {
-                "description": "Secret of service principal to onboard to Arc"
-            }
         }
     },
     "variables": {

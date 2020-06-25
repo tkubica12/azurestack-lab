@@ -1,0 +1,35 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {},
+    "variables": {
+        "publicDomain": "azurepraha.com",
+        "stackDomain": ".prghub.cloudapp.hpedu.cz"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Network/dnszones/CNAME",
+            "apiVersion": "2018-05-01",
+            "name": "[concat(variables('publicDomain'), '/aks')]",
+            "properties": {
+                "TTL": 3600,
+                "CNAMERecord": {
+                    "cname": "[concat('ingress', variables('stackDomain'))]"
+                },
+                "targetResource": {}
+            }
+        },
+        {
+            "type": "Microsoft.Network/dnszones/CNAME",
+            "apiVersion": "2018-05-01",
+            "name": "[concat(variables('publicDomain'), '/demo')]",
+            "properties": {
+                "TTL": 3600,
+                "CNAMERecord": {
+                    "cname": "[concat('demo', variables('stackDomain'))]"
+                },
+                "targetResource": {}
+            }
+        }
+    ]
+}

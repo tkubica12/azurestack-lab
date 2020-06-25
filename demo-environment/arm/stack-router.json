@@ -13,12 +13,6 @@
             "metadata": {
                 "description": "Azure Monitor workspace key"
             }
-        },
-        "arcSecret": {
-            "type": "securestring",
-            "metadata": {
-                "description": "Secret of service principal to onboard to Arc"
-            }
         }
     },
     "variables": {
@@ -44,7 +38,10 @@
             "apiVersion": "2017-10-01",
             "location": "[resourceGroup().location]",
             "properties": {
-                "publicIPAllocationMethod": "Dynamic"
+                "publicIPAllocationMethod": "Dynamic",
+                "dnsSettings": {
+                    "domainNameLabel": "demo"
+                }
             }
         },
         {
