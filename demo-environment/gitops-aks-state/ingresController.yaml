@@ -1,0 +1,21 @@
+apiVersion: helm.fluxcd.io/v1
+kind: HelmRelease
+metadata:
+  name: ingress
+  namespace: default
+spec:
+  releaseName: ingress
+  targetNamespace: default
+  timeout: 300
+  resetValues: false
+  wait: true
+  forceUpgrade: false
+  chart:
+    repository: https://kubernetes-charts.storage.googleapis.com/
+    name: nginx-ingress
+    version: 1.40.1
+  values:
+    controller:
+      service:
+        annotations:
+          service.beta.kubernetes.io/azure-dns-label-name: ingress
