@@ -88,6 +88,9 @@ metadata:
     app: opentelemetry-tfgen
 spec:
   replicas: 1
+  selector:
+    matchLabels:
+      app: opentelemetry-tfgen
   template:
     metadata:
       labels:
