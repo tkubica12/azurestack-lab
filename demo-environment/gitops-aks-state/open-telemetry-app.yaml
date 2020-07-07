@@ -49,7 +49,7 @@ spec:
   replicas: 2
   selector:
     matchLabels:
-      app: opentelemetry-app1
+      app: opentelemetry-app2
   template:
     metadata:
       labels:
