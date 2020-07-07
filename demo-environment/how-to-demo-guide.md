@@ -105,3 +105,5 @@ Go to Configuration section and explain, that complete state of cluster (deploye
 
 Vote is accessible at http://vote.aks.azurepraha.com
 
+
+

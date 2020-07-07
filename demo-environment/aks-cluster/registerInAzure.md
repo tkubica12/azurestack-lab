@@ -1,34 +1,60 @@
-# Onboard AKS engine cluster to Azure Arc for Kubernetes
+# Connect to Kubernetes from router VM
+Connect to AKS cluster master node using SSH from router VM.
 
-Connect to AKS cluster master node.
-
-Get kubeconfig information and save it as file locally.
+Get kubeconfig information and tranfer it to router VM file ~/.kube/config.
 
 ```bash
 kubectl config view --raw
 ```
 
-Connect to Kubernetes remotely.
+On Router VM install kubectl and connect to Kubernetes remotely.
 
 ```bash
-export KUBECONFIG=./kubeconfig.yaml
+curl -LO https://storage.googleapis.com/kubernetes-release/release/`curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt`/bin/linux/amd64/kubectl
+chmod +x ./kubectl
+sudo mv ./kubectl /usr/local/bin/kubectl
+
 kubectl get nodes
 ```
 
 Install Helm on your local machine by download binary for your OS ![here](https://github.com/helm/helm/releases)
+
+Install Azure CLI.
+
+```bash
+sudo apt-get update
+sudo apt-get install ca-certificates curl apt-transport-https lsb-release gnupg -y
+curl -sL https://packages.microsoft.com/keys/microsoft.asc |
+    gpg --dearmor |
+    sudo tee /etc/apt/trusted.gpg.d/microsoft.gpg > /dev/null
+AZ_REPO=$(lsb_release -cs)
+echo "deb [arch=amd64] https://packages.microsoft.com/repos/azure-cli/ $AZ_REPO main" | sudo tee /etc/apt/sources.list.d/azure-cli.list
+sudo apt-get update
+sudo apt-get install azure-cli -y
+```
 
 Target your Azure subscription and install CLI extensions.
 
 ```bash
 az login 
 az account set -s "AzureStackCZSK"
-az extension add --name connectedk8s
-az extension add --name k8sconfiguration
 ```
 
-Connect cluster.
+# Store Kubernetes Secrets
+We will prepare secrets in cluster such as Application Insights key.
 
 ```bash
+export ai_key=$(az resource show -g monitoring-rg -n appinsightsazurestackczsk-ot --resource-type Microsoft.Insights/components --query properties.InstrumentationKey -o tsv)
+kubectl create secret generic applicationinsights --from-literal=key=$ai_key
+```
+
+# Onboard AKS engine cluster to Azure Arc for Kubernetes
+Install CLI extensions and connect cluster.
+
+```bash
+az extension add --name connectedk8s
+az extension add --name k8sconfiguration
+
 az connectedk8s connect --name aks-azure-stack --resource-group arc-azurestack-rg
 ```
 

@@ -5,9 +5,20 @@
     "variables": {
         "location": "[resourceGroup().location]",
         "workspaceName": "workspaceazurestackczsk",
-        "automationName": "automationazurestackczsk"
+        "automationName": "automationazurestackczsk",
+        "appInsightsName": "appinsightsazurestackczsk-ot"
     },
     "resources": [
+        {
+            "name": "[variables('appInsightsName')]",
+            "type": "Microsoft.Insights/components",
+            "apiVersion": "2015-05-01",
+            "location": "[variables('location')]",
+            "kind": "web",
+            "properties": {
+                "Application_Type": "web"
+            }
+        },
         {
             "type": "Microsoft.OperationalInsights/workspaces",
             "apiVersion": "2015-11-01-preview",
@@ -86,7 +97,7 @@
                         "promotionCode": ""
                     }
                 },
-                            {
+                {
                     "apiVersion": "2015-11-01-preview",
                     "type": "datasources",
                     "name": "SyslogKern",
@@ -115,7 +126,7 @@
                         ]
                     }
                 },
-                            {
+                {
                     "apiVersion": "2015-11-01-preview",
                     "type": "datasources",
                     "name": "Syslog",
@@ -144,7 +155,7 @@
                         ]
                     }
                 },
-                            {
+                {
                     "apiVersion": "2015-11-01-preview",
                     "type": "datasources",
                     "name": "SyslogAuth",
@@ -173,7 +184,7 @@
                         ]
                     }
                 },
-                            {
+                {
                     "apiVersion": "2015-11-01-preview",
                     "type": "datasources",
                     "name": "SyslogUser",
@@ -202,7 +213,7 @@
                         ]
                     }
                 },
-                            {
+                {
                     "apiVersion": "2015-11-01-preview",
                     "type": "datasources",
                     "name": "SyslogDaemon",
@@ -231,7 +242,7 @@
                         ]
                     }
                 },
-                            {
+                {
                     "apiVersion": "2015-11-01-preview",
                     "type": "datasources",
                     "name": "SyslogAuthPriv",
@@ -260,7 +271,7 @@
                         ]
                     }
                 },
-                   {
+                {
                     "apiVersion": "2015-11-01-preview",
                     "type": "datasources",
                     "name": "SyslogCollection",
@@ -272,7 +283,7 @@
                         "state": "Enabled"
                     }
                 },
-                 {
+                {
                     "apiVersion": "2015-11-01-preview",
                     "type": "datasources",
                     "name": "Application",
@@ -292,7 +303,7 @@
                         ]
                     }
                 },
-                 {
+                {
                     "apiVersion": "2015-11-01-preview",
                     "type": "datasources",
                     "name": "System",

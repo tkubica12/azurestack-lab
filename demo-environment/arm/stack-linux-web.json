@@ -229,7 +229,7 @@
                             },
                             {
                                 "type": "Microsoft.Compute/virtualMachines/extensions",
-                                "name": "installAppAndRegisterArc",
+                                "name": "installAppA",
                                 "properties": {
                                     "publisher": "Microsoft.Azure.Extensions",
                                     "type": "CustomScript",
