@@ -226,6 +226,24 @@
                                         "workspaceKey": "[parameters('workspaceKey')]"
                                     }
                                 }
+                            },
+                            {
+                                "type": "Microsoft.Compute/virtualMachines/extensions",
+                                "name": "installAppAndRegisterArc",
+                                "properties": {
+                                    "publisher": "Microsoft.Azure.Extensions",
+                                    "type": "CustomScript",
+                                    "typeHandlerVersion": "2.0",
+                                    "autoUpgradeMinorVersion": true,
+                                    "settings": {
+                                    },
+                                    "protectedSettings": {
+                                        "commandToExecute": "[concat('bash installapp-', parameters('appVersion'), '.sh ', parameters('sqlIp'), ' ', variables('sqlUsername'), ' ',  parameters('sqlPassword'))]",
+                                        "fileUris": [
+                                            "[concat('https://raw.githubusercontent.com/tkubica12/azurestack-lab/master/demo-environment/arm/scripts/installapp-', parameters('appVersion'), '.sh')]"
+                                        ]
+                                    }
+                                }
                             }
                         ]
                     }

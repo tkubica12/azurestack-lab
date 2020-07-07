@@ -1,14 +1,14 @@
 # Demo architecture
 External access:
-- Windows web on VMSS: http://demo.azurepraha:9002
-- Linux todo web on VMSS: http://demo.azurepraha:9003
+- Windows web on VMSS: http://demo.azurepraha.com:9002
+- Linux todo web on VMSS: http://demo.azurepraha.com:9003
 - SSH to router: demo.azurepraha.com:22
-- RDP to AD: demo.azurepraha:9001
-- RDP to SQL VM: demo.azurepraha:9005
-- VMSS ARM automation demo: http://demo.azurepraha:9004/info.aspx
+- RDP to AD: demo.azurepraha.com:9001
+- RDP to SQL VM: demo.azurepraha.com:9005
+- VMSS ARM automation demo: http://demo.azurepraha.com:9004/info.aspx
 
 # Monitoring
-All VMs are configured with VM Extensions to provision agents to be monitored from Azure including Azure Monitor agent, Dependency agent and onboarding to Azure Arc for Servers.
+All VMs are configured with VM Extensions to provision agents to be monitored from Azure including Azure Monitor agent and Dependency agent
 
 - Show VM Extensions on Windows and Linux machines
 - In Azure open Azure Monitor and show VM Insights including Map and telemetry
@@ -18,8 +18,8 @@ All VMs are configured with VM Extensions to provision agents to be monitored fr
 There are two apps - one Windows and one Linux deployed as VMSS. This solution automatically creates VMs and use VM Extensions to configure application. Use Scale to quickly increase number of Web VMs behind load-balancer.
 
 External IPs:
-- Linux web: http://demo.azurepraha:9003
-- Windows web: http://demo.azurepraha:9002 and http://demo.azurepraha:9002/info.aspx
+- Linux web: http://demo.azurepraha.com:9003
+- Windows web: http://demo.azurepraha.com:9002 and http://demo.azurepraha.com:9002/info.aspx
 
 Windows app is simple web page returning node ID. Use curl (or disable cookie session persistance) to show how requests are balanced. Via GUI increase or decrease VM count.
 
