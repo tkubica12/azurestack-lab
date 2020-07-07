@@ -1,11 +1,11 @@
 # Demo architecture
 External access:
-- Windows web on VMSS: http://demo.azurepraha.com:9002
-- Linux todo web on VMSS: http://demo.azurepraha.com:9003
-- SSH to router: demo.azurepraha.com:22
-- RDP to AD: demo.azurepraha.com:9001
+- Windows web on VMSS: [http://windows.demo.azurepraha.com/info.aspx](http://windows.demo.azurepraha.com/info.aspx)
+- Linux todo web on VMSS: [http://linux.demo.azurepraha.com/](http://linux.demo.azurepraha.com/)
+- SSH to router: stackuser@demo.azurepraha.com
+- RDP to AD: demo.azurepraha.com
 - RDP to SQL VM: demo.azurepraha.com:9005
-- VMSS ARM automation demo: http://demo.azurepraha.com:9004/info.aspx
+- VMSS ARM automation demo: [http://arm.demo.azurepraha.com/info.aspx](http://arm.demo.azurepraha.com/info.aspx)
 
 # Monitoring
 All VMs are configured with VM Extensions to provision agents to be monitored from Azure including Azure Monitor agent and Dependency agent
@@ -18,8 +18,8 @@ All VMs are configured with VM Extensions to provision agents to be monitored fr
 There are two apps - one Windows and one Linux deployed as VMSS. This solution automatically creates VMs and use VM Extensions to configure application. Use Scale to quickly increase number of Web VMs behind load-balancer.
 
 External IPs:
-- Linux web: http://demo.azurepraha.com:9003
-- Windows web: http://demo.azurepraha.com:9002 and http://demo.azurepraha.com:9002/info.aspx
+- Linux web: [http://linux.demo.azurepraha.com/](http://linux.demo.azurepraha.com/)
+- Windows web: [http://windows.demo.azurepraha.com](http://windows.demo.azurepraha.com) and [http://windows.demo.azurepraha.com/info.aspx](http://windows.demo.azurepraha.com/info.aspx)
 
 Windows app is simple web page returning node ID. Use curl (or disable cookie session persistance) to show how requests are balanced. Via GUI increase or decrease VM count.
 
@@ -39,7 +39,7 @@ az group deployment create -g windows-web-rg `
 Note you still see v1 in output of our app:
 
 ```powershell
-curl http://demo.azurepraha:9002/info.aspx
+curl http://windows.demo.azurepraha.com/info.aspx
 ```
 
 Go to GUI of VMSS and see Instances are not running on latest model (meaning latest versions of images, DSC scripts etc.). Upgrade one of VMs and use curl to see, that we get balanced betwwen two VMs - one running v1, one v2. Once you are satisfied, upgrade all instances to new model and everything runs on v2.
@@ -85,7 +85,7 @@ az group deployment create -g armdemo-web-rg --template-file stack-windows-web.j
 Note you still see v1 in output of our app:
 
 ```powershell
-curl http://demo.azurepraha:9002/info.aspx
+curl http://arm.demo.azurepraha.com/info.aspx
 ```
 
 Go to GUI of VMSS and see Instances are not running on latest model (meaning latest versions of images, DSC scripts etc.). Upgrade one of VMs and use curl to see, that we get balanced betwwen two VMs - one running v1, one v2. Once you are satisfied, upgrade all instances to new model and everything runs on v2.

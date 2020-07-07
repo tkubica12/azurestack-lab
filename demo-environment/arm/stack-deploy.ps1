@@ -57,18 +57,45 @@ sudo iptables -t nat -A POSTROUTING -p tcp --destination 10.1.2.250 --dport 3389
 sudo /etc/init.d/netfilter-persistent save
 
 echo "<H1>Azure Stack demo Prague</H1>" | sudo tee /var/www/html/index.html
-cat << EOF | sudo tee /etc/nginx/conf.d/demo.conf
+cat << EOF | sudo tee /etc/nginx/conf.d/windows.demo.conf
 server {
     listen 80;
     listen [::]:80;
   
-    server_name web-win.azurepraha.com;
+    server_name windows.demo.azurepraha.com;
   
     location / {
         proxy_pass http://10.1.2.100/;
     }
   }
 EOF
+
+cat << EOF | sudo tee /etc/nginx/conf.d/linux.demo.conf
+server {
+    listen 80;
+    listen [::]:80;
+  
+    server_name linux.demo.azurepraha.com;
+  
+    location / {
+        proxy_pass http://10.1.2.200/;
+    }
+  }
+EOF
+
+cat << EOF | sudo tee /etc/nginx/conf.d/arm.demo.conf
+server {
+    listen 80;
+    listen [::]:80;
+  
+    server_name arm.demo.azurepraha.com;
+  
+    location / {
+        proxy_pass http://10.1.3.100/;
+    }
+  }
+EOF
+
 sudo nginx -s reload
 
 # Configure AD
