@@ -12,3 +12,9 @@ az deployment sub create -l westeurope --template-file azure-kubernetes-policy.j
 
 # Deploy records on azurepraha.com zone
 az deployment group create -g domain-rg --template-file azure-dns.json
+
+# Deploy AI resources
+az group create -n ai-rg -l westeurope
+az group deployment  create -g ai-rg --template-file azure-ai.json
+
+Follow documentation at [https://github.com/tkubica12/custom-vision-toys](https://github.com/tkubica12/custom-vision-toys) to import project plysaci.

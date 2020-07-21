@@ -45,7 +45,32 @@ We will prepare secrets in cluster such as Application Insights key.
 
 ```bash
 export ai_key=$(az resource show -g monitoring-rg -n appinsightsazurestackczsk-ot --resource-type Microsoft.Insights/components --query properties.InstrumentationKey -o tsv)
+
 kubectl create secret generic applicationinsights --from-literal=key=$ai_key
+```
+
+Create secret with credentials to Face API container repo.
+
+```bash
+export dockerServer=""
+export dockerUsername=""
+export dockerPassword=""
+export dockerEmail=""
+
+kubectl create secret docker-registry face-registry \
+    --docker-server=$dockerServer \
+    --docker-username=$dockerUsername \
+    --docker-password=$dockerPassword \
+    --docker-email=$dockerEmail
+```
+
+Create secret for face api.
+
+```bash
+export faceApiKey=""
+export faceApiEndpoint=""
+
+kubectl create secret generic face-api --from-literal=key=$faceApiKey --from-literal=endpoint=$faceApiEndpoint
 ```
 
 # Onboard AKS engine cluster to Azure Arc for Kubernetes

@@ -136,4 +136,3 @@ az group create -n linux-web-rg -l $region
 az group deployment create -g linux-web-rg --template-file stack-linux-web.json --parameters @stack-linux-web.parameters.json
 
 
-az group deployment create -g linux-web-rg --template-file stack-linux-web.json --parameters @stack-linux-web.parameters.json --parameters appVersion=v1

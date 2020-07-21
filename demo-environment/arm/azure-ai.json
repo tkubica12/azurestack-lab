@@ -1,0 +1,42 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2014-04-01-preview/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+    },
+    "variables": {
+        "customVisionName": "[concat('customvision-', uniqueString(resourceGroup().id))]",
+        "cognitiveServicesName": "[concat('cognitiveservices-', uniqueString(resourceGroup().id))]",
+        "location": "[resourceGroup().location]"
+    },
+    "resources": [
+        {
+            "apiVersion": "2016-02-01-preview",
+            "name": "[variables('customVisionName')]",
+            "location": "[variables('location')]",
+            "type": "Microsoft.CognitiveServices/accounts",
+            "kind": "CustomVision.Training",
+            "sku": {
+                "name": "S0"
+            },
+            "properties": {
+                "customSubDomainName": "[variables('customVisionName')]"
+            }
+        },
+        {
+            "apiVersion": "2016-02-01-preview",
+            "name": "[variables('cognitiveServicesName')]",
+            "location": "[variables('location')]",
+            "type": "Microsoft.CognitiveServices/accounts",
+            "kind": "CognitiveServices",
+            "sku": {
+                "name": "S0"
+            },
+            "properties": {
+                "customSubDomainName": null,
+                "apiProperties": {
+                    "statisticsEnabled": false
+                }
+            }
+        }
+    ]
+}
