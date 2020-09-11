@@ -53,12 +53,14 @@ az account set -s "AzureStackCZSK"
 # Store Kubernetes Secrets
 We will prepare secrets in cluster such as Application Insights key.
 
+# Application Insights key
 ```bash
 export ai_key=$(az resource show -g monitoring-rg -n appinsightsazurestackczsk-ot --resource-type Microsoft.Insights/components --query properties.InstrumentationKey -o tsv)
 
 kubectl create secret generic applicationinsights --from-literal=key=$ai_key
 ```
 
+# Cognitive services keys
 Create secret with credentials to Face API container repo.
 
 ```bash
@@ -82,6 +84,9 @@ export faceApiEndpoint=""
 
 kubectl create secret generic face-api --from-literal=key=$faceApiKey --from-literal=endpoint=$faceApiEndpoint
 ```
+
+## API Management secrets
+Deploy API Management in Azure, create gateway a use kubectl to pass secrets to AKS with name azurestackgw-token.
 
 # Onboard AKS engine cluster to Azure Arc for Kubernetes
 Install CLI extensions and connect cluster.
