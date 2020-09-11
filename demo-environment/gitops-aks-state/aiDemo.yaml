@@ -9,6 +9,6 @@ spec:
   wait: true
   forceUpgrade: true
   chart:
-    git: git@github.com:tkubica12/azurestack-lab
+    git: https://github.com/tkubica12/azurestack-lab
     ref: master
     path: demo-environment/ai-helm
