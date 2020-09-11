@@ -1,0 +1,14 @@
+apiVersion: helm.fluxcd.io/v1
+kind: HelmRelease
+metadata:
+  name: ai
+spec:
+  releaseName: ai
+  timeout: 300
+  resetValues: false
+  wait: true
+  forceUpgrade: true
+  chart:
+    git: git@github.com:tkubica12/azurestack-lab
+    ref: master
+    path: demo-environment/ai-helm
