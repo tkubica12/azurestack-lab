@@ -117,6 +117,21 @@
                                 "id": "[resourceId('Microsoft.Network/networkSecurityGroups', 'no-external-inbound-nsg')]"
                             }
                         }
+                    },
+                    {
+                        "name": "aks-subnet",
+                        "properties": {
+                            "addressPrefix": "10.1.4.0/24",
+                            "networkSecurityGroup": {
+                                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', 'no-external-inbound-nsg')]"
+                            }
+                        }
+                    },
+                    {
+                        "name": "GatewaySubnet",
+                        "properties": {
+                            "addressPrefix": "10.1.10.0/24"
+                        }
                     }
                 ]
             }

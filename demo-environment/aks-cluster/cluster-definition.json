@@ -1,0 +1,69 @@
+{
+    "apiVersion": "vlabs",
+    "location": "prghub",
+    "properties": {
+        "orchestratorProfile": {
+            "orchestratorType": "Kubernetes",
+            "orchestratorRelease": "1.17",
+            "orchestratorVersion": "1.17.11",
+            "kubernetesConfig": {
+                "cloudProviderBackoff": true,
+                "cloudProviderBackoffRetries": 1,
+                "cloudProviderBackoffDuration": 30,
+                "cloudProviderRateLimit": true,
+                "cloudProviderRateLimitQPS": 100,
+                "cloudProviderRateLimitBucket": 150,
+                "cloudProviderRateLimitQPSWrite": 25,
+                "cloudProviderRateLimitBucketWrite": 30,
+                "kubernetesImageBase": "mcr.microsoft.com/k8s/azurestack/core/",
+                "useInstanceMetadata": false,
+                "networkPlugin": "kubenet",
+                "kubeletConfig": {
+                    "--node-status-update-frequency": "1m"
+                },
+                "controllerManagerConfig": {
+                    "--node-monitor-grace-period": "5m",
+                    "--pod-eviction-timeout": "5m",
+                    "--route-reconciliation-period": "1m"
+                }
+            }
+        },
+        "customCloudProfile": {
+            "portalURL": "https://portal.prghub.hpedu.cz/",
+            "identitySystem": "aad"
+        },
+        "featureFlags": {
+            "enableTelemetry": true
+        },
+        "masterProfile": {
+            "dnsPrefix": "aks",
+            "distro": "aks-ubuntu-16.04",
+            "count": 3,
+            "vmSize": "Standard_D3_v2"
+        },
+        "agentPoolProfiles": [
+            {
+                "name": "linuxpool",
+                "count": 3,
+                "vmSize": "Standard_D2_v2",
+                "distro": "aks-ubuntu-16.04",
+                "availabilityProfile": "AvailabilitySet",
+                "AcceleratedNetworkingEnabled": false
+            }
+        ],
+        "linuxProfile": {
+            "adminUsername": "stackuser",
+            "ssh": {
+                "publicKeys": [
+                    {
+                        "keyData": "<PUBLICKEY>"
+                    }
+                ]
+            }
+        },
+        "servicePrincipalProfile": {
+            "clientId": "d50ceb3c-68e4-4345-8daa-5402e0aa7069",
+            "secret": "<SECRET>"
+        }
+    }
+}
