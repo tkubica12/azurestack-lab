@@ -12,3 +12,5 @@ spec:
     git: https://github.com/tkubica12/azurestack-lab
     ref: master
     path: demo-environment/ai-helm
+  values:
+    baseurl: ai.aks.azurepraha.com
