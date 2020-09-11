@@ -1,20 +1,19 @@
----
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: AzureStackGw-env
+  name: azurestackgw-env
 data:
   config.service.endpoint: "https://azurestackapidemo.management.azure-api.net/subscriptions/bd4b6767-6bbe-4cdd-9a33-9a6bd737afc2/resourceGroups/apim-rg/providers/Microsoft.ApiManagement/service/azurestackapidemo?api-version=2019-12-01"
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: AzureStackGw
+  name: azurestackgw
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: AzureStackGw
+      app: azurestackgw
   strategy:
     type: RollingUpdate
     rollingUpdate:
@@ -23,11 +22,11 @@ spec:
   template:
     metadata:
       labels:
-        app: AzureStackGw
+        app: azurestackgw
     spec:
       terminationGracePeriodSeconds: 60
       containers:
-      - name: AzureStackGw
+      - name: azurestackgw
         image: mcr.microsoft.com/azure-api-management/gateway:latest
         ports:
         - name: http
@@ -51,12 +50,12 @@ spec:
               key: value
         envFrom:
         - configMapRef:
-            name: AzureStackGw-env
+            name: azurestackgw-env
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: AzureStackGw
+  name: azurestackgw
   annotations:
     service.beta.kubernetes.io/azure-dns-label-name: apigw
 spec:
@@ -70,4 +69,4 @@ spec:
     port: 443
     targetPort: 8081
   selector:
-    app: AzureStackGw
+    app: azurestackgw
