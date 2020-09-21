@@ -12,12 +12,26 @@ All VMs are configured with VM Extensions to provision agents to be monitored fr
 
 - Show VM Extensions on Windows and Linux machines
 - In Azure open Azure Monitor and show VM Insights including Map and telemetry
-- In Azure open Azure Monitor Logs and search for logs from all monitored VMs
+- In Azure open Azure Monitor Logs and search for logs from all monitored VMs - Syslog, Events, Update, WindowsFirewall, ConfigurationData
+- Open Security Center, show vulnerabilities, updates missing etc. on sql-vm and others
+- Open Azure Sentinel and show connectors and incidents
 - In Azure open Azure Monitor Applications and show appinsightsazurestackczsk-ot
     - Application Map and click on instances and calls
     - Search and click on some Request item to show distributed application tracing (calls between various components)
     - Performance and show characteristics of various API calls
     - Metrics - show built-in and custom metrics
+
+# Login to Azure Stack
+$domain = "prghub.hpedu.cz"
+az cloud register -n AzureStack `
+    --endpoint-resource-manager "https://management.$domain" `
+    --suffix-storage-endpoint $domain `
+    --suffix-keyvault-dns ".vault.$domain" `
+    --profile "2019-03-01-hybrid"
+az cloud set -n AzureStack
+az login --tenant azurestackprg.onmicrosoft.com
+
+az account set -s "demo"
 
 # Virtual Machine Scale Set
 There are two apps - one Windows and one Linux deployed as VMSS. This solution automatically creates VMs and use VM Extensions to configure application. Use Scale to quickly increase number of Web VMs behind load-balancer.
