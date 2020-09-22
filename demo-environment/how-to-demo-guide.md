@@ -126,4 +126,20 @@ Vote is accessible at http://vote.aks.azurepraha.com
 
 There is also opentelemetry application with traffic generator. There is no specific GUI for this app, but it exports data using Open Telemetry to Azure Monitor Application Insights for visualization, distributed tracing and Metrics collection.
 
+# Azure Arc for Data Services
+TBD
 
+# AI in Azure Stack
+Access https://www.customvision.ai/ and showcase creation of custom vision project, training and export as container
+
+Access OpenAPI Spec at http://ai.aks.azurepraha.com running at Kubernetes
+
+POST image to custom vision API.
+
+POST image to Face API.
+
+# API Management in Azure Stack
+TBD
+
+# Logic Apps in Azure Stack
+TBD
