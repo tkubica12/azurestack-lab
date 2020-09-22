@@ -139,7 +139,7 @@ POST image to custom vision API.
 POST image to Face API.
 
 # API Management in Azure Stack
-TBD
+Go to Azure Portal and show APIM. Scroll down to Gateways and show Azure Stack is connected.
 
 # Logic Apps in Azure Stack
 TBD
