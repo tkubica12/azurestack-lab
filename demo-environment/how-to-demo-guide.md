@@ -127,7 +127,11 @@ Vote is accessible at http://vote.aks.azurepraha.com
 There is also opentelemetry application with traffic generator. There is no specific GUI for this app, but it exports data using Open Telemetry to Azure Monitor Application Insights for visualization, distributed tracing and Metrics collection.
 
 # Azure Arc for Data Services
-TBD
+Explain how Arc for data services work.
+
+Show Azure resources and Azure Data Studio.
+
+Display objects in AKS in arcdata namespace.
 
 # AI in Azure Stack
 Access https://www.customvision.ai/ and showcase creation of custom vision project, training and export as container
@@ -142,4 +146,22 @@ POST image to Face API.
 Go to Azure Portal and show APIM. Scroll down to Gateways and show Azure Stack is connected.
 
 # Logic Apps in Azure Stack
-TBD
+Open Logic App project in VS Code, open designer and explain how iPaaS works.
+
+Show Logic App deployed to Azure, get link and test it is working.
+
+Show how to build Logic App as container, show how it runs in AKS and test it on its endpoint at 
+
+```bash
+curl -X GET "http://lapp.aks.azurepraha.com/api/lapp-stateless/triggers/manual/invoke?api-version=2020-05-01-preview&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=UqIa3RKllfq3n9bTkQBhkBY-V8sfDINrlXOYhUGcnxc"
+```
+
+If needed you can read token by accessing:
+
+```bash
+# Get master key as stored in storage container
+export masterKey="opDBixz9ClLU7dBaJuI6TIrDATunyDgvVnlYxrZKhiPuRJ58kstFmg=="
+
+# Get invoke token
+curl -X POST "http://lapp.aks.azurepraha.com/runtime/webhooks/workflow/api/management/workflows/lapp-stateless/triggers/manual/listCallbackUrl?api-version=2019-10-01-edge-preview&code=$masterKey" -d ''
+```
