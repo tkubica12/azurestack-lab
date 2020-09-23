@@ -35,7 +35,7 @@ metadata:
   annotations:
     kubernetes.io/ingress.class: nginx
     ingress.kubernetes.io/rewrite-target: /
-  name: azure-vote-ingress
+  name: lapp-ingress
 spec:
   rules:
     - host: lapp.aks.azurepraha.com
