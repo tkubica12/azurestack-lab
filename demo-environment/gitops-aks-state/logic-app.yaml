@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: logic-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: logic-app
+  template:
+    metadata:
+      labels:
+        app: logic-app
+    spec:
+      containers:
+      - name: logic-app
+        image: tkubica/lapp:v1
+        ports:
+        - containerPort: 80
+          name: http
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: logic-app
+spec:
+  ports:
+  - port: 80
+  selector:
+    app: logic-app
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    ingress.kubernetes.io/rewrite-target: /
+  name: azure-vote-ingress
+spec:
+  rules:
+    - host: lapp.aks.azurepraha.com
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: logic-app
+              servicePort: 80
