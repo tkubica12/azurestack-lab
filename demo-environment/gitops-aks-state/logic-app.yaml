@@ -15,6 +15,9 @@ spec:
       containers:
       - name: logic-app
         image: tkubica/lapp:v1
+        env:
+        - name: WEBSITE_HOSTNAME
+          value: lapp.aks.azurepraha.com
         ports:
         - containerPort: 80
           name: http
